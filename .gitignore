@@ -1,5 +1,108 @@
+# Entornos virtuales
 venv/
+env/
+ENV/
+.venv
+env.bak/
+venv.bak/
+
+# Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+__pycache__/
+
+# Base de datos SQLite
+*.db
+*.sqlite
+*.sqlite3
+wally.db
+
+# Archivos de log
+*.log
+*.logs
+logs/
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+desktop.ini
+*.sublime-*
+.project
+.pydevproject
+
+# Archivos de credenciales y secretos
+.env
+.env.*
+*.key
+*.pem
+*.p12
+secrets/
+credentials.json
+
+# Archivos del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.dll
+*.exe
+
+# Archivos de cobertura y pruebas
+.coverage
+.coverage.*
+.cover
+*.cover
+.pytest_cache/
+htmlcov/
+.tox/
+
+# Archivos de paquetes
+*.tar.gz
+*.rar
+*.zip
+*.7z
+
+# Archivos temporales
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# Archivos de configuración local
+config.local.*
+*.local.py
+
+# Archivos de documentación generada
+docs/_build/
+site/
+
+# Archivos grandes o multimedia (opcional)
+*.mp4
+*.avi
+*.mov
+*.mp3
+*.wav
+*.iso

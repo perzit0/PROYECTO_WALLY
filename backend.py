@@ -1,176 +1,62 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, session
 from datetime import datetime
 import hashlib
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "WALLY_SECRET_KEY_2026_CAMBIA_ESTA_CLAVE"
+app.secret_key = "WALLY_SECRET_KEY_2026"
 
-# ============================================
-# BASE DE DATOS SIMULADA (en memoria)
-# ============================================
-
-usuarios = {
-    "admin": {
-        "password": hashlib.sha256("admin123".encode()).hexdigest(),
-        "rol": "admin"
-    },
-    "invitado": {
-        "password": hashlib.sha256("invitado".encode()).hexdigest(),
-        "rol": "user"
-    }
-}
-
-# Datos del robot
-robot_data = {
-    "nombre": "WALLY-1",
-    "color": "#4CAF50"
-}
-
-# Última medición
-ultima_medicion = {
-    'co': 0,
-    'pm': 0,
-    'mq135': 0,
-    'lat': -12.0464,
-    'lng': -77.0428,
-    'timestamp': None
-}
-
-historial = []
-
-# ============================================
-# DECORADORES
-# ============================================
-
-def login_requerido(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'usuario' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
+# Usuario admin fijo
+USUARIO_ADMIN = "teamwally"
+PASSWORD_HASH = hashlib.sha256("mamani159".encode()).hexdigest()
 
 def admin_requerido(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'usuario' not in session:
-            return redirect(url_for('login'))
-        if session.get('rol') != 'admin':
-            return jsonify({"error": "Acceso denegado. Se requieren permisos de administrador."}), 403
+        if 'usuario' not in session or session.get('rol') != 'admin':
+            return jsonify({"error": "Acceso denegado"}), 403
         return f(*args, **kwargs)
     return decorated_function
 
-# ============================================
-# RUTAS DE AUTENTICACIÓN
-# ============================================
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if 'usuario' in session:
-        return redirect(url_for('index'))
-    
-    if request.method == 'POST':
-        usuario = request.form.get('usuario')
-        password = request.form.get('password')
-        
-        if usuario in usuarios:
-            password_hash = hashlib.sha256(password.encode()).hexdigest()
-            if usuarios[usuario]["password"] == password_hash:
-                session['usuario'] = usuario
-                session['rol'] = usuarios[usuario]["rol"]
-                return redirect(url_for('index'))
-        
-        return render_template('login.html', error="Usuario o contraseña incorrectos")
-    
-    return render_template('login.html', error=None)
-
-@app.route('/acceso-invitado', methods=['POST'])
-def acceso_invitado():
-    """Crea una sesión de invitado sin necesidad de contraseña"""
-    session['usuario'] = 'invitado'
-    session['rol'] = 'user'
-    return jsonify({"status": "ok"})
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-# ============================================
-# RUTAS DEL MAPA Y DATOS DEL ROBOT
-# ============================================
-
 @app.route('/')
-@login_requerido
 def index():
-    return render_template('index.html', 
-                          usuario=session['usuario'], 
-                          rol=session['rol'],
-                          robot_nombre=robot_data['nombre'],
-                          robot_color=robot_data['color'])
+    return render_template('index.html')
 
-@app.route('/api/datos-robot', methods=['GET'])
-def obtener_datos_robot():
-    return jsonify(robot_data)
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    
+    password_check = hashlib.sha256(password.encode()).hexdigest()
+    
+    if username == USUARIO_ADMIN and password_check == PASSWORD_HASH:
+        session['usuario'] = username
+        session['rol'] = 'admin'
+        return jsonify({"success": True, "rol": "admin"})
+    else:
+        return jsonify({"success": False, "error": "Usuario o contraseña incorrectos"}), 401
 
-@app.route('/api/datos-robot', methods=['POST'])
-@admin_requerido
-def actualizar_datos_robot():
-    global robot_data
-    try:
-        datos = request.get_json()
-        if 'nombre' in datos:
-            robot_data['nombre'] = datos['nombre']
-        if 'color' in datos:
-            robot_data['color'] = datos['color']
-        return jsonify({"status": "ok", "robot": robot_data})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+@app.route('/admin/logout', methods=['POST'])
+def admin_logout():
+    session.clear()
+    return jsonify({"success": True})
 
-# ============================================
-# API PARA DATOS DE SENSORES
-# ============================================
+@app.route('/admin/status')
+def admin_status():
+    if 'usuario' in session and session.get('rol') == 'admin':
+        return jsonify({"is_admin": True, "usuario": session['usuario']})
+    return jsonify({"is_admin": False})
 
-@app.route('/api/datos', methods=['POST'])
-def recibir_datos():
-    global ultima_medicion, historial
-    try:
-        datos = request.get_json()
-        
-        required_fields = ['co', 'pm', 'mq135', 'lat', 'lng']
-        for field in required_fields:
-            if field not in datos:
-                return jsonify({'error': f'Falta el campo {field}'}), 400
-        
-        registro = {
-            'co': datos['co'],
-            'pm': datos['pm'],
-            'mq135': datos['mq135'],
-            'lat': datos['lat'],
-            'lng': datos['lng'],
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        ultima_medicion = registro
-        historial.append(registro)
-        if len(historial) > 100:
-            historial.pop(0)
-        
-        print(f"✅ Datos recibidos - CO: {datos['co']}, Lat: {datos['lat']}")
-        return jsonify({'status': 'ok'}), 200
-        
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/ultima-medicion')
-def obtener_ultima_medicion():
-    return jsonify(ultima_medicion)
-
-@app.route('/api/historial')
-def obtener_historial():
-    return jsonify(historial)
+@app.route('/api/dispositivos')
+def obtener_dispositivos():
+    # Datos de prueba
+    dispositivos = [
+        {'id': 'WALLY-1', 'nombre': 'WALLY-1', 'color': '#4CAF50', 'lat': -12.0464, 'lng': -77.0428, 'co': 85, 'pm': 32, 'mq135': 180, 'timestamp': datetime.now().isoformat()},
+        {'id': 'WALLY-2', 'nombre': 'WALLY-2', 'color': '#2196F3', 'lat': -12.1210, 'lng': -77.0265, 'co': 145, 'pm': 68, 'mq135': 320, 'timestamp': datetime.now().isoformat()},
+        {'id': 'WALLY-DEMO', 'nombre': 'WALLY-DEMO', 'color': '#FF9800', 'lat': -12.0960, 'lng': -77.0345, 'co': 220, 'pm': 95, 'mq135': 450, 'timestamp': datetime.now().isoformat()}
+    ]
+    return jsonify(dispositivos)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

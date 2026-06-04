@@ -15,249 +15,281 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .dashboard {
-            display: flex;
+        #map-container {
+            position: relative;
             height: 100vh;
+            width: 100%;
         }
         
         #map {
-            flex: 7;
             height: 100%;
+            width: 100%;
+        }
+        
+        .admin-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .admin-btn:hover {
+            background: #00adb5;
+            transform: scale(1.02);
+        }
+        
+        .admin-btn.logged {
+            background: #4CAF50;
         }
         
         .info-panel {
-            flex: 3;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: white;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
-            z-index: 1;
-        }
-        
-        .info-panel h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-            border-bottom: 2px solid #00adb5;
-            display: inline-block;
-            padding-bottom: 5px;
-        }
-        
-        .subtitle {
-            color: #aaa;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-        
-        .user-info {
-            background: rgba(0, 173, 181, 0.2);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 12px;
+            padding: 15px 20px;
+            border-radius: 15px;
+            z-index: 1000;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
         }
         
-        .logout-btn {
-            background: #f44336;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 11px;
+        .sensor-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
         }
         
-        .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
+        .sensor-item {
+            text-align: center;
         }
         
-        .card h3 {
-            color: #00adb5;
-            margin-bottom: 15px;
-            font-size: 16px;
+        .sensor-label {
+            font-size: 12px;
+            color: #aaa;
         }
         
         .sensor-value {
-            font-size: 32px;
+            font-size: 20px;
             font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .sensor-unit {
-            font-size: 14px;
-            color: #aaa;
         }
         
         .co-alto { color: #ff6b6b; }
         .co-medio { color: #ffd93d; }
         .co-bajo { color: #6bcb77; }
         
-        .coordenadas {
-            font-family: monospace;
-            font-size: 14px;
-            background: #00000055;
-            padding: 10px;
-            border-radius: 5px;
+        .robot-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .robot-selector select {
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
         }
         
         .timestamp {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
-            margin-top: 15px;
-            text-align: center;
         }
         
-        .estado-conexion {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #ff6b6b;
-            margin-right: 8px;
-        }
-        
-        .estado-conectado {
-            background-color: #6bcb77;
-        }
-        
-        .robot-name {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 10px 0;
-            text-align: center;
-        }
-        
-        .edit-btn {
-            background: #00adb5;
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .edit-btn:hover {
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 20px;
+            width: 320px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+        
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: #00adb5;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .modal-content button:hover {
             background: #008c93;
+        }
+        
+        .modal-content .error {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
         }
         
         .color-selector {
             display: flex;
             gap: 10px;
             justify-content: center;
-            margin: 10px 0;
+            margin: 15px 0;
         }
         
         .color-option {
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid white;
+            transition: transform 0.2s;
         }
         
         .color-option:hover {
             transform: scale(1.1);
         }
         
-        .admin-badge {
-            background: #ff9800;
-            color: #1a1a2e;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: bold;
+        .datos-prueba {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: #ffd93d;
+            font-size: 12px;
+            font-family: monospace;
         }
         
         @media (max-width: 768px) {
-            .dashboard {
-                flex-direction: column;
-            }
-            #map {
-                height: 50vh;
-            }
             .info-panel {
-                height: 50vh;
+                flex-direction: column;
+                text-align: center;
+            }
+            .sensor-info {
+                justify-content: center;
             }
         }
     </style>
-    
-    <!-- 🔑 LUGAR 1: PON AQUÍ TU CLAVE DE API (reemplaza TU_API_KEY_GOOGLE_MAPS) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU"></script>
-    
+    <!-- API de Google Maps con tu clave -->
+    <script async defer 
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap">
+    </script>
 </head>
 <body>
-    <div class="dashboard">
+    <div id="map-container">
         <div id="map"></div>
         
+        <div class="datos-prueba">
+            🧪 MODO PRUEBA - Datos simulados
+        </div>
+        
+        <button id="adminBtn" class="admin-btn" onclick="abrirModalLogin()">
+            🔐 Administrador
+        </button>
+        
         <div class="info-panel">
-            <h1>🤖 WALLY</h1>
-            <div class="subtitle">Sistema de Monitoreo de Calidad del Aire</div>
-            
-            <div class="user-info">
-                <span>👤 {{ usuario }} 
-                    {% if rol == 'admin' %}
-                        <span class="admin-badge">ADMIN</span>
-                    {% endif %}
-                </span>
-                <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+            <div class="robot-selector">
+                <span>🤖 Robot:</span>
+                <select id="robotSelect" onchange="cambiarRobotSeleccionado()">
+                    <option value="WALLY-1">WALLY-1 (Robot Principal)</option>
+                    <option value="WALLY-2">WALLY-2 (Robot Secundario)</option>
+                    <option value="WALLY-DEMO">WALLY-DEMO (Demostración)</option>
+                </select>
             </div>
-            
-            <div class="card">
-                <h3>📍 Información del Robot</h3>
-                <div class="robot-name" id="robot-name">{{ robot_nombre }}</div>
-                {% if rol == 'admin' %}
-                <button class="edit-btn" onclick="abrirEditor()">✏️ Editar Robot</button>
-                {% endif %}
+            <div class="sensor-info">
+                <div class="sensor-item">
+                    <div class="sensor-label">💨 CO</div>
+                    <div class="sensor-value" id="coValue">---</div>
+                </div>
+                <div class="sensor-item">
+                    <div class="sensor-label">🌫️ PM2.5</div>
+                    <div class="sensor-value" id="pmValue">---</div>
+                </div>
+                <div class="sensor-item">
+                    <div class="sensor-label">🏭 MQ-135</div>
+                    <div class="sensor-value" id="mq135Value">---</div>
+                </div>
             </div>
-            
-            <div class="card">
-                <h3>📍 Última Ubicación</h3>
-                <div class="coordenadas" id="coords">Esperando datos...</div>
-            </div>
-            
-            <div class="card">
-                <h3>💨 Monóxido de Carbono (CO)</h3>
-                <div class="sensor-value" id="co-value">---</div>
-                <div class="sensor-unit">ppm (partes por millón)</div>
-                <div id="co-status" style="margin-top: 10px;"></div>
-            </div>
-            
-            <div class="card">
-                <h3>🌫️ Material Particulado (PM2.5)</h3>
-                <div class="sensor-value" id="pm-value">---</div>
-                <div class="sensor-unit">µg/m³</div>
-            </div>
-            
-            <div class="card">
-                <h3>🏭 Calidad del Aire (MQ-135)</h3>
-                <div class="sensor-value" id="mq135-value">---</div>
-                <div class="sensor-unit">Valor ADC (0-4095)</div>
-            </div>
-            
             <div class="timestamp" id="timestamp">
-                <span id="estado-conexion" class="estado-conexion"></span>
-                Esperando conexión...
+                Actualización en tiempo real...
             </div>
         </div>
     </div>
     
-    <!-- Modal para editar el robot (solo admin) -->
-    <div id="editorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: #1a1a2e; padding: 30px; border-radius: 15px; width: 300px; text-align: center; color: white;">
+    <!-- Modal Login -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalLogin()">&times;</span>
+            <h2>🔐 Acceso Administrador</h2>
+            <input type="text" id="loginUser" placeholder="Usuario" autocomplete="off">
+            <input type="password" id="loginPass" placeholder="Contraseña">
+            <button onclick="iniciarSesion()">Iniciar Sesión</button>
+            <div id="loginError" class="error"></div>
+        </div>
+    </div>
+    
+    <!-- Modal Editar Robot -->
+    <div id="editorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarEditor()">&times;</span>
             <h2>🤖 Editar Robot</h2>
             <div style="margin: 20px 0;">
                 <label>Nombre del Robot:</label>
-                <input type="text" id="edit-name" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: none;">
+                <input type="text" id="editName" style="width: 100%;">
             </div>
-            <div style="margin: 20px 0;">
+            <div>
                 <label>Color del Robot:</label>
                 <div class="color-selector">
                     <div class="color-option" style="background: #4CAF50;" onclick="seleccionarColor('#4CAF50')"></div>
@@ -268,27 +300,51 @@
                     <div class="color-option" style="background: #00BCD4;" onclick="seleccionarColor('#00BCD4')"></div>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="guardarEdicion()" style="flex: 1; padding: 10px; background: #4CAF50; border: none; color: white; border-radius: 5px; cursor: pointer;">Guardar</button>
-                <button onclick="cerrarEditor()" style="flex: 1; padding: 10px; background: #f44336; border: none; color: white; border-radius: 5px; cursor: pointer;">Cancelar</button>
-            </div>
+            <button onclick="guardarEdicionRobot()">Guardar cambios</button>
         </div>
     </div>
-    
+
     <script>
-        // Variables globales
         let map;
-        let marker;
+        let markers = {};
+        let robotSeleccionado = "WALLY-1";
+        let esAdmin = false;
         let updateInterval;
-        let currentInfoWindow = null;
+        let colorTemporal = null;
         
-        // Datos del robot
-        let robotConfig = {
-            nombre: "{{ robot_nombre }}",
-            color: "{{ robot_color }}"
+        // Datos simulados para modo prueba (sin ESP32)
+        const datosSimulados = {
+            "WALLY-1": {
+                nombre: "WALLY-1",
+                color: "#4CAF50",
+                lat: -12.0464,
+                lng: -77.0428,
+                co: 85,
+                pm: 32,
+                mq135: 180,
+                timestamp: new Date().toISOString()
+            },
+            "WALLY-2": {
+                nombre: "WALLY-2",
+                color: "#2196F3",
+                lat: -12.1210,
+                lng: -77.0265,
+                co: 145,
+                pm: 68,
+                mq135: 320,
+                timestamp: new Date().toISOString()
+            },
+            "WALLY-DEMO": {
+                nombre: "WALLY-DEMO",
+                color: "#FF9800",
+                lat: -12.0960,
+                lng: -77.0345,
+                co: 220,
+                pm: 95,
+                mq135: 450,
+                timestamp: new Date().toISOString()
+            }
         };
-        
-        const esAdmin = "{{ rol }}" === "admin";
         
         function generarIconoRobot(color) {
             const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
@@ -302,208 +358,231 @@
                 <circle cx='45' cy='30' r='3' fill='white'/>
                 <circle cx='55' cy='30' r='3' fill='white'/>
             </svg>`;
-            
             return {
                 url: "data:image/svg+xml," + encodeURIComponent(svg),
-                scaledSize: new google.maps.Size(60, 60)
+                scaledSize: new google.maps.Size(50, 50)
             };
         }
         
         function initMap() {
-            const centroInicial = { lat: -12.0464, lng: -77.0428 };
-            
+            console.log("Inicializando mapa...");
             map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 13,
-                center: centroInicial,
+                zoom: 12,
+                center: { lat: -12.0464, lng: -77.0428 },
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
+            console.log("Mapa creado correctamente");
             
-            marker = new google.maps.Marker({
-                position: centroInicial,
-                map: map,
-                title: robotConfig.nombre,
-                icon: generarIconoRobot(robotConfig.color),
-                animation: google.maps.Animation.DROP
-            });
+            // Crear marcadores para todos los robots simulados
+            for (const [id, datos] of Object.entries(datosSimulados)) {
+                markers[id] = new google.maps.Marker({
+                    position: { lat: datos.lat, lng: datos.lng },
+                    map: map,
+                    title: datos.nombre,
+                    icon: generarIconoRobot(datos.color)
+                });
+                
+                markers[id].addListener('click', () => {
+                    robotSeleccionado = id;
+                    actualizarPanelConRobot(datos);
+                    document.getElementById('robotSelect').value = id;
+                    if (esAdmin) abrirEditor();
+                });
+            }
             
-            marker.addListener('click', () => {
-                abrirInfoWindow();
-            });
+            // Actualizar panel con el primer robot
+            actualizarPanelConRobot(datosSimulados["WALLY-1"]);
             
-            startUpdating();
+            // Iniciar simulación de datos en tiempo real
+            startSimulacion();
+            
+            verificarSesionAdmin();
         }
         
-        function abrirInfoWindow() {
-            if (currentInfoWindow) {
-                currentInfoWindow.close();
+        function actualizarPanelConRobot(robot) {
+            document.getElementById('coValue').innerHTML = Math.round(robot.co);
+            document.getElementById('pmValue').innerHTML = Math.round(robot.pm);
+            document.getElementById('mq135Value').innerHTML = Math.round(robot.mq135);
+            
+            const coElement = document.getElementById('coValue');
+            if (robot.co > 200) {
+                coElement.className = 'sensor-value co-alto';
+            } else if (robot.co > 100) {
+                coElement.className = 'sensor-value co-medio';
+            } else {
+                coElement.className = 'sensor-value co-bajo';
             }
             
-            const coValue = document.getElementById('co-value').innerText;
-            const pmValue = document.getElementById('pm-value').innerText;
+            const fecha = new Date(robot.timestamp);
+            document.getElementById('timestamp').innerHTML = `Última actualización: ${fecha.toLocaleTimeString()}`;
             
-            let botonEdicion = '';
+            // Centrar mapa en el robot seleccionado
+            map.setCenter({ lat: robot.lat, lng: robot.lng });
+        }
+        
+        function cambiarRobotSeleccionado() {
+            const select = document.getElementById('robotSelect');
+            robotSeleccionado = select.value;
+            if (datosSimulados[robotSeleccionado]) {
+                actualizarPanelConRobot(datosSimulados[robotSeleccionado]);
+            }
+        }
+        
+        // Simular datos cambiando aleatoriamente
+        function startSimulacion() {
+            setInterval(() => {
+                for (const [id, datos] of Object.entries(datosSimulados)) {
+                    // Variar valores aleatoriamente
+                    datos.co = Math.max(20, Math.min(500, datos.co + (Math.random() - 0.5) * 30));
+                    datos.pm = Math.max(10, Math.min(200, datos.pm + (Math.random() - 0.5) * 15));
+                    datos.mq135 = Math.max(50, Math.min(600, datos.mq135 + (Math.random() - 0.5) * 40));
+                    datos.timestamp = new Date().toISOString();
+                    
+                    // Pequeño movimiento en el mapa para WALLY-1
+                    if (id === "WALLY-1") {
+                        datos.lat += (Math.random() - 0.5) * 0.0005;
+                        datos.lng += (Math.random() - 0.5) * 0.0005;
+                    }
+                    
+                    // Actualizar marcador
+                    if (markers[id]) {
+                        markers[id].setPosition({ lat: datos.lat, lng: datos.lng });
+                    }
+                }
+                
+                // Actualizar panel si el robot seleccionado sigue siendo el mismo
+                if (datosSimulados[robotSeleccionado]) {
+                    actualizarPanelConRobot(datosSimulados[robotSeleccionado]);
+                }
+            }, 3000);
+        }
+        
+        async function verificarSesionAdmin() {
+            try {
+                const response = await fetch('/admin/status');
+                const data = await response.json();
+                esAdmin = data.is_admin;
+                const adminBtn = document.getElementById('adminBtn');
+                if (esAdmin) {
+                    adminBtn.innerHTML = '👑 Administrador';
+                    adminBtn.classList.add('logged');
+                } else {
+                    adminBtn.innerHTML = '🔐 Administrador';
+                    adminBtn.classList.remove('logged');
+                }
+            } catch (error) {
+                console.log("Modo prueba - Admin no disponible");
+            }
+        }
+        
+        function abrirModalLogin() {
             if (esAdmin) {
-                botonEdicion = `<button onclick="abrirEditor()" style="background: #00adb5; border: none; color: white; padding: 5px 15px; border-radius: 5px; margin-top: 5px; cursor: pointer;">✏️ Editar Robot</button>`;
+                cerrarSesion();
+            } else {
+                document.getElementById('loginModal').style.display = 'flex';
+                document.getElementById('loginError').innerHTML = '';
             }
+        }
+        
+        function cerrarModalLogin() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        
+        async function iniciarSesion() {
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
             
-            const contentString = `
-                <div style="text-align: center; min-width: 200px; background: #1a1a2e; color: white; padding: 10px; border-radius: 10px;">
-                    <div style="font-size: 40px;">🤖</div>
-                    <h3 style="margin: 5px 0;">${robotConfig.nombre}</h3>
-                    <div style="margin: 10px 0;">
-                        <div>📊 CO: ${coValue} ppm</div>
-                        <div>🌫️ PM: ${pmValue} µg/m³</div>
-                    </div>
-                    ${botonEdicion}
-                </div>
-            `;
-            
-            currentInfoWindow = new google.maps.InfoWindow({
-                content: contentString,
-                pixelOffset: new google.maps.Size(0, -30)
-            });
-            
-            currentInfoWindow.open(map, marker);
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    esAdmin = true;
+                    cerrarModalLogin();
+                    verificarSesionAdmin();
+                    abrirEditor();
+                } else {
+                    document.getElementById('loginError').innerHTML = data.error || 'Credenciales incorrectas';
+                }
+            } catch (error) {
+                // Modo prueba: permitir login con credenciales locales
+                if (username === "teamwally" && password === "mamani159") {
+                    esAdmin = true;
+                    cerrarModalLogin();
+                    verificarSesionAdmin();
+                    abrirEditor();
+                } else {
+                    document.getElementById('loginError').innerHTML = 'Usuario o contraseña incorrectos';
+                }
+            }
+        }
+        
+        async function cerrarSesion() {
+            try {
+                await fetch('/admin/logout', { method: 'POST' });
+            } catch (error) {}
+            esAdmin = false;
+            verificarSesionAdmin();
+            cerrarEditor();
         }
         
         function abrirEditor() {
             if (!esAdmin) {
-                alert("Solo administradores pueden editar el robot.");
+                alert("Debes ser administrador");
                 return;
             }
-            document.getElementById('edit-name').value = robotConfig.nombre;
+            const robot = datosSimulados[robotSeleccionado];
+            document.getElementById('editName').value = robot.nombre;
             document.getElementById('editorModal').style.display = 'flex';
+            colorTemporal = robot.color;
+            // Previsualizar el color actual
+            if (markers[robotSeleccionado]) {
+                markers[robotSeleccionado].setIcon(generarIconoRobot(colorTemporal));
+            }
         }
         
         function cerrarEditor() {
             document.getElementById('editorModal').style.display = 'none';
+            // Restaurar color original si no se guardó
+            if (robotSeleccionado && datosSimulados[robotSeleccionado] && markers[robotSeleccionado]) {
+                markers[robotSeleccionado].setIcon(generarIconoRobot(datosSimulados[robotSeleccionado].color));
+            }
         }
         
         function seleccionarColor(color) {
-            robotConfig.color = color;
-            marker.setIcon(generarIconoRobot(color));
+            colorTemporal = color;
+            if (markers[robotSeleccionado]) {
+                markers[robotSeleccionado].setIcon(generarIconoRobot(color));
+            }
         }
         
-        async function guardarEdicion() {
-            const nuevoNombre = document.getElementById('edit-name').value;
-            if (!nuevoNombre) return;
+        function guardarEdicionRobot() {
+            const nuevoNombre = document.getElementById('editName').value;
+            const nuevoColor = colorTemporal || datosSimulados[robotSeleccionado].color;
             
-            robotConfig.nombre = nuevoNombre;
-            
-            try {
-                const response = await fetch('/api/datos-robot', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nombre: robotConfig.nombre,
-                        color: robotConfig.color
-                    })
-                });
+            if (datosSimulados[robotSeleccionado]) {
+                datosSimulados[robotSeleccionado].nombre = nuevoNombre;
+                datosSimulados[robotSeleccionado].color = nuevoColor;
+                markers[robotSeleccionado].setTitle(nuevoNombre);
+                markers[robotSeleccionado].setIcon(generarIconoRobot(nuevoColor));
                 
-                if (response.ok) {
-                    marker.setTitle(robotConfig.nombre);
-                    marker.setIcon(generarIconoRobot(robotConfig.color));
-                    document.getElementById('robot-name').innerHTML = robotConfig.nombre;
-                    cerrarEditor();
-                    
-                    if (currentInfoWindow) {
-                        currentInfoWindow.close();
-                        abrirInfoWindow();
-                    }
-                } else {
-                    const error = await response.json();
-                    alert("Error: " + (error.error || "No se pudo guardar"));
+                // Actualizar el selector
+                const select = document.getElementById('robotSelect');
+                const option = select.querySelector(`option[value="${robotSeleccionado}"]`);
+                if (option) {
+                    option.textContent = `${nuevoNombre} (${robotSeleccionado === "WALLY-1" ? "Robot Principal" : robotSeleccionado === "WALLY-2" ? "Robot Secundario" : "Demostración"})`;
                 }
-            } catch (error) {
-                console.error("Error al guardar:", error);
-                alert("Error de conexión al guardar");
-            }
-        }
-        
-        async function obtenerUltimaMedicion() {
-            try {
-                const response = await fetch('/api/ultima-medicion');
-                if (!response.ok) throw new Error('Error en la respuesta');
-                const data = await response.json();
-                
-                if (data && data.lat && data.lng && data.lat !== 0) {
-                    actualizarInterfaz(data);
-                    actualizarConexionStatus(true);
-                } else {
-                    actualizarConexionStatus(false);
-                }
-            } catch (error) {
-                console.error("Error:", error);
-                actualizarConexionStatus(false);
-            }
-        }
-        
-        function actualizarInterfaz(data) {
-            document.getElementById('coords').innerHTML = 
-                `Latitud: ${data.lat.toFixed(6)}<br>Longitud: ${data.lng.toFixed(6)}`;
-            
-            const coValue = data.co;
-            const pmValue = data.pm;
-            const mq135Value = data.mq135;
-            
-            document.getElementById('co-value').innerHTML = coValue;
-            document.getElementById('pm-value').innerHTML = pmValue;
-            document.getElementById('mq135-value').innerHTML = mq135Value;
-            
-            const coElement = document.getElementById('co-value');
-            const coStatusElement = document.getElementById('co-status');
-            
-            if (coValue > 300) {
-                coElement.className = 'sensor-value co-alto';
-                coStatusElement.innerHTML = '⚠️ PELIGRO - Niveles altos de CO';
-                coStatusElement.style.color = '#ff6b6b';
-            } else if (coValue > 100) {
-                coElement.className = 'sensor-value co-medio';
-                coStatusElement.innerHTML = '⚡ Moderado - Precaución';
-                coStatusElement.style.color = '#ffd93d';
-            } else {
-                coElement.className = 'sensor-value co-bajo';
-                coStatusElement.innerHTML = '✅ Normal - Aire seguro';
-                coStatusElement.style.color = '#6bcb77';
             }
             
-            if (data.timestamp) {
-                const fecha = new Date(data.timestamp);
-                document.getElementById('timestamp').innerHTML = 
-                    `<span id="estado-conexion" class="estado-conexion estado-conectado"></span>
-                     Última actualización: ${fecha.toLocaleString()}`;
-            }
-            
-            const nuevaPosicion = { lat: data.lat, lng: data.lng };
-            marker.setPosition(nuevaPosicion);
-            map.setCenter(nuevaPosicion);
-            marker.setTitle(`${robotConfig.nombre} | CO: ${coValue} ppm | PM: ${pmValue} µg/m³`);
-            
-            marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => marker.setAnimation(null), 750);
+            cerrarEditor();
+            alert("Robot actualizado (modo prueba)");
         }
         
-        function actualizarConexionStatus(conectado) {
-            const estadoSpan = document.getElementById('estado-conexion');
-            estadoSpan.className = conectado ? 'estado-conexion estado-conectado' : 'estado-conexion';
-        }
-        
-        function startUpdating() {
-            obtenerUltimaMedicion();
-            updateInterval = setInterval(obtenerUltimaMedicion, 5000);
-        }
-        
-        function cerrarSesion() {
-            window.location.href = '/logout';
-        }
-        
+        // Asegurar que initMap esté disponible globalmente
         window.initMap = initMap;
     </script>
-    
-    <!-- 🔑 LUGAR 2: PON AQUÍ TU CLAVE DE API (reemplaza TU_API_KEY_GOOGLE_MAPS) -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap" async defer></script>
-    
 </body>
 </html>
