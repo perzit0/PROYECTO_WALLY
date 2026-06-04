@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WALLY - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .robot-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0 10px;
+            border: none;
+            border-radius: 8px;
+            background: #00adb5;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #008c93;
+            transform: scale(1.02);
+        }
+        
+        .btn-mapa {
+            background: #4CAF50;
+        }
+        
+        .btn-mapa:hover {
+            background: #45a049;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .divider {
+            margin: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        
+        .divider span {
+            background: #16213e;
+            padding: 0 10px;
+            position: relative;
+            top: -12px;
+            color: #aaa;
+            font-size: 12px;
+        }
+        
+        .guest-link {
+            color: #00adb5;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .guest-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="robot-icon">🤖</div>
+        <h1>WALLY</h1>
+        <div class="subtitle">Sistema de Monitoreo de Calidad del Aire</div>
+        
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <input type="text" name="usuario" placeholder="Usuario" required>
+            <input type="password" name="password" placeholder="Contraseña" required>
+            <button type="submit">🔐 Iniciar Sesión</button>
+        </form>
+        
+        <div class="divider">
+            <span>o</span>
+        </div>
+        
+        <form action="/acceso-directo" method="GET" style="margin-top: 10px;">
+            <button type="submit" class="btn-mapa" formaction="/" formmethod="GET" onclick="accesoInvitado()">🗺️ Abrir Mapa como Invitado</button>
+        </form>
+    </div>
+    
+    <script>
+        function accesoInvitado() {
+            // Hacer una petición para crear sesión de invitado
+            fetch('/acceso-invitado', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(() => {
+                window.location.href = '/';
+            });
+        }
+    </script>
+</body>
+</html>

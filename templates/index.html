@@ -49,6 +49,27 @@
             font-size: 12px;
         }
         
+        .user-info {
+            background: rgba(0, 173, 181, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
         .card {
             background: rgba(255,255,255,0.1);
             border-radius: 10px;
@@ -104,14 +125,14 @@
         .estado-conectado {
             background-color: #6bcb77;
         }
-
+        
         .robot-name {
             font-size: 18px;
             font-weight: bold;
             margin: 10px 0;
             text-align: center;
         }
-
+        
         .edit-btn {
             background: #00adb5;
             border: none;
@@ -122,18 +143,18 @@
             margin-top: 10px;
             width: 100%;
         }
-
+        
         .edit-btn:hover {
             background: #008c93;
         }
-
+        
         .color-selector {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin: 10px 0;
         }
-
+        
         .color-option {
             width: 30px;
             height: 30px;
@@ -141,11 +162,20 @@
             cursor: pointer;
             border: 2px solid white;
         }
-
+        
         .color-option:hover {
             transform: scale(1.1);
         }
-
+        
+        .admin-badge {
+            background: #ff9800;
+            color: #1a1a2e;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
         @media (max-width: 768px) {
             .dashboard {
                 flex-direction: column;
@@ -158,7 +188,12 @@
             }
         }
     </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY_GOOGLE_MAPS"></script>
+    
+    <!-- ========================================== -->
+    <!-- 🔑 LUGAR 1: PON AQUÍ TU CLAVE DE API (línea 1 de 2) -->
+    <!-- ========================================== -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU"></script>
+    
 </head>
 <body>
     <div class="dashboard">
@@ -168,10 +203,21 @@
             <h1>🤖 WALLY</h1>
             <div class="subtitle">Sistema de Monitoreo de Calidad del Aire</div>
             
+            <div class="user-info">
+                <span>👤 {{ usuario }} 
+                    {% if rol == 'admin' %}
+                        <span class="admin-badge">ADMIN</span>
+                    {% endif %}
+                </span>
+                <button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+            
             <div class="card">
                 <h3>📍 Información del Robot</h3>
-                <div class="robot-name" id="robot-name">WALLY-1</div>
+                <div class="robot-name" id="robot-name">{{ robot_nombre }}</div>
+                {% if rol == 'admin' %}
                 <button class="edit-btn" onclick="abrirEditor()">✏️ Editar Robot</button>
+                {% endif %}
             </div>
             
             <div class="card">
@@ -204,8 +250,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Modal para editar el robot -->
+    
+    <!-- Modal para editar el robot (solo admin) -->
     <div id="editorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
         <div style="background: #1a1a2e; padding: 30px; border-radius: 15px; width: 300px; text-align: center; color: white;">
             <h2>🤖 Editar Robot</h2>
@@ -216,12 +262,12 @@
             <div style="margin: 20px 0;">
                 <label>Color del Robot:</label>
                 <div class="color-selector">
-                    <div class="color-option" style="background: #4CAF50;" onclick="cambiarColor('#4CAF50')"></div>
-                    <div class="color-option" style="background: #2196F3;" onclick="cambiarColor('#2196F3')"></div>
-                    <div class="color-option" style="background: #FF9800;" onclick="cambiarColor('#FF9800')"></div>
-                    <div class="color-option" style="background: #E91E63;" onclick="cambiarColor('#E91E63')"></div>
-                    <div class="color-option" style="background: #9C27B0;" onclick="cambiarColor('#9C27B0')"></div>
-                    <div class="color-option" style="background: #00BCD4;" onclick="cambiarColor('#00BCD4')"></div>
+                    <div class="color-option" style="background: #4CAF50;" onclick="seleccionarColor('#4CAF50')"></div>
+                    <div class="color-option" style="background: #2196F3;" onclick="seleccionarColor('#2196F3')"></div>
+                    <div class="color-option" style="background: #FF9800;" onclick="seleccionarColor('#FF9800')"></div>
+                    <div class="color-option" style="background: #E91E63;" onclick="seleccionarColor('#E91E63')"></div>
+                    <div class="color-option" style="background: #9C27B0;" onclick="seleccionarColor('#9C27B0')"></div>
+                    <div class="color-option" style="background: #00BCD4;" onclick="seleccionarColor('#00BCD4')"></div>
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -230,7 +276,7 @@
             </div>
         </div>
     </div>
-
+    
     <script>
         // Variables globales
         let map;
@@ -238,15 +284,16 @@
         let updateInterval;
         let currentInfoWindow = null;
         
-        // Datos del robot (se guardan en localStorage)
+        // Datos del robot
         let robotConfig = {
-            nombre: localStorage.getItem('robotNombre') || 'WALLY-1',
-            color: localStorage.getItem('robotColor') || '#4CAF50'
+            nombre: "{{ robot_nombre }}",
+            color: "{{ robot_color }}"
         };
+        
+        const esAdmin = "{{ rol }}" === "admin";
         
         // Función para generar el ícono del robot con el color seleccionado
         function generarIconoRobot(color) {
-            // Crear SVG dinámico con el color elegido
             const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
                 <rect x='25' y='40' width='50' height='40' rx='10' fill='${color}'/>
                 <rect x='15' y='50' width='10' height='20' rx='3' fill='#333'/>
@@ -275,7 +322,6 @@
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
             
-            // Crear marcador con ícono de robot personalizado
             marker = new google.maps.Marker({
                 position: centroInicial,
                 map: map,
@@ -284,7 +330,6 @@
                 animation: google.maps.Animation.DROP
             });
             
-            // Evento de clic en el marcador
             marker.addListener('click', () => {
                 abrirInfoWindow();
             });
@@ -294,23 +339,27 @@
         
         // Abrir ventana de información al hacer clic en el robot
         function abrirInfoWindow() {
-            // Cerrar ventana anterior si existe
             if (currentInfoWindow) {
                 currentInfoWindow.close();
             }
             
-            // Crear contenido HTML para la ventana
+            const coValue = document.getElementById('co-value').innerText;
+            const pmValue = document.getElementById('pm-value').innerText;
+            
+            let botonEdicion = '';
+            if (esAdmin) {
+                botonEdicion = `<button onclick="abrirEditor()" style="background: #00adb5; border: none; color: white; padding: 5px 15px; border-radius: 5px; margin-top: 5px; cursor: pointer;">✏️ Editar Robot</button>`;
+            }
+            
             const contentString = `
                 <div style="text-align: center; min-width: 200px; background: #1a1a2e; color: white; padding: 10px; border-radius: 10px;">
                     <div style="font-size: 40px;">🤖</div>
                     <h3 style="margin: 5px 0;">${robotConfig.nombre}</h3>
                     <div style="margin: 10px 0;">
-                        <div>📊 CO: ${document.getElementById('co-value').innerText} ppm</div>
-                        <div>🌫️ PM: ${document.getElementById('pm-value').innerText} µg/m³</div>
+                        <div>📊 CO: ${coValue} ppm</div>
+                        <div>🌫️ PM: ${pmValue} µg/m³</div>
                     </div>
-                    <button onclick="abrirEditor()" style="background: #00adb5; border: none; color: white; padding: 5px 15px; border-radius: 5px; margin-top: 5px; cursor: pointer;">
-                        ✏️ Editar Robot
-                    </button>
+                    ${botonEdicion}
                 </div>
             `;
             
@@ -324,79 +373,83 @@
         
         // Abrir el modal de edición
         function abrirEditor() {
+            if (!esAdmin) {
+                alert("Solo administradores pueden editar el robot.");
+                return;
+            }
             document.getElementById('edit-name').value = robotConfig.nombre;
             document.getElementById('editorModal').style.display = 'flex';
         }
         
-        // Cerrar el modal
         function cerrarEditor() {
             document.getElementById('editorModal').style.display = 'none';
         }
         
-        // Cambiar color temporalmente (en el modal)
-        function cambiarColor(color) {
+        function seleccionarColor(color) {
             robotConfig.color = color;
-            // Previsualizar el cambio en el marcador
             marker.setIcon(generarIconoRobot(color));
         }
         
-        // Guardar la edición
-        function guardarEdicion() {
+        async function guardarEdicion() {
             const nuevoNombre = document.getElementById('edit-name').value;
-            if (nuevoNombre) {
-                robotConfig.nombre = nuevoNombre;
-            }
+            if (!nuevoNombre) return;
             
-            // Guardar en localStorage
-            localStorage.setItem('robotNombre', robotConfig.nombre);
-            localStorage.setItem('robotColor', robotConfig.color);
+            robotConfig.nombre = nuevoNombre;
             
-            // Actualizar el marcador
-            marker.setTitle(robotConfig.nombre);
-            marker.setIcon(generarIconoRobot(robotConfig.color));
-            
-            // Actualizar el panel lateral
-            document.getElementById('robot-name').innerHTML = robotConfig.nombre;
-            
-            // Cerrar modal
-            cerrarEditor();
-            
-            // Si la ventana de info está abierta, actualizarla
-            if (currentInfoWindow) {
-                currentInfoWindow.close();
-                abrirInfoWindow();
+            try {
+                const response = await fetch('/api/datos-robot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nombre: robotConfig.nombre,
+                        color: robotConfig.color
+                    })
+                });
+                
+                if (response.ok) {
+                    marker.setTitle(robotConfig.nombre);
+                    marker.setIcon(generarIconoRobot(robotConfig.color));
+                    document.getElementById('robot-name').innerHTML = robotConfig.nombre;
+                    cerrarEditor();
+                    
+                    if (currentInfoWindow) {
+                        currentInfoWindow.close();
+                        abrirInfoWindow();
+                    }
+                } else {
+                    const error = await response.json();
+                    alert("Error: " + (error.error || "No se pudo guardar"));
+                }
+            } catch (error) {
+                console.error("Error al guardar:", error);
+                alert("Error de conexión al guardar");
             }
         }
         
-        // Función para obtener la última medición del backend
         async function obtenerUltimaMedicion() {
             try {
                 const response = await fetch('/api/ultima-medicion');
-                if (!response.ok) {
-                    throw new Error('Error en la respuesta del servidor');
-                }
+                if (!response.ok) throw new Error('Error en la respuesta');
                 const data = await response.json();
                 
-                if (data && data.lat && data.lng) {
+                if (data && data.lat && data.lng && data.lat !== 0) {
                     actualizarInterfaz(data);
                     actualizarConexionStatus(true);
                 } else {
-                    console.log("Esperando datos del ESP32...");
                     actualizarConexionStatus(false);
                 }
             } catch (error) {
-                console.error("Error al obtener datos:", error);
+                console.error("Error:", error);
                 actualizarConexionStatus(false);
             }
         }
         
-        // Actualizar toda la interfaz con los nuevos datos
         function actualizarInterfaz(data) {
-            // 1. Actualizar coordenadas
             document.getElementById('coords').innerHTML = 
                 `Latitud: ${data.lat.toFixed(6)}<br>Longitud: ${data.lng.toFixed(6)}`;
             
-            // 2. Actualizar valores de sensores
             const coValue = data.co;
             const pmValue = data.pm;
             const mq135Value = data.mq135;
@@ -405,7 +458,6 @@
             document.getElementById('pm-value').innerHTML = pmValue;
             document.getElementById('mq135-value').innerHTML = mq135Value;
             
-            // 3. Clasificar nivel de CO
             const coElement = document.getElementById('co-value');
             const coStatusElement = document.getElementById('co-status');
             
@@ -423,7 +475,6 @@
                 coStatusElement.style.color = '#6bcb77';
             }
             
-            // 4. Actualizar timestamp
             if (data.timestamp) {
                 const fecha = new Date(data.timestamp);
                 document.getElementById('timestamp').innerHTML = 
@@ -431,42 +482,36 @@
                      Última actualización: ${fecha.toLocaleString()}`;
             }
             
-            // 5. Actualizar posición del marcador
             const nuevaPosicion = { lat: data.lat, lng: data.lng };
             marker.setPosition(nuevaPosicion);
             map.setCenter(nuevaPosicion);
             marker.setTitle(`${robotConfig.nombre} | CO: ${coValue} ppm | PM: ${pmValue} µg/m³`);
             
-            // Animación de rebote al actualizar
             marker.setAnimation(google.maps.Animation.BOUNCE);
-            setTimeout(() => {
-                marker.setAnimation(null);
-            }, 750);
+            setTimeout(() => marker.setAnimation(null), 750);
         }
         
-        // Actualizar el indicador de conexión
         function actualizarConexionStatus(conectado) {
             const estadoSpan = document.getElementById('estado-conexion');
-            if (conectado) {
-                estadoSpan.className = 'estado-conexion estado-conectado';
-            } else {
-                estadoSpan.className = 'estado-conexion';
-            }
+            estadoSpan.className = conectado ? 'estado-conexion estado-conectado' : 'estado-conexion';
         }
         
-        // Iniciar la actualización periódica
         function startUpdating() {
             obtenerUltimaMedicion();
-            updateInterval = setInterval(obtenerUltimaMedicion, 3000);
+            updateInterval = setInterval(obtenerUltimaMedicion, 5000);
         }
         
-        // Actualizar nombre mostrado en el panel
-        function actualizarNombreEnPanel() {
-            document.getElementById('robot-name').innerHTML = robotConfig.nombre;
+        function cerrarSesion() {
+            window.location.href = '/logout';
         }
         
         window.initMap = initMap;
-        actualizarNombreEnPanel();
     </script>
+    
+    <!-- ========================================== -->
+    <!-- 🔑 LUGAR 2: PON AQUÍ TU CLAVE DE API (línea 2 de 2) -->
+    <!-- ========================================== -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap" async defer></script>
+    
 </body>
 </html>
