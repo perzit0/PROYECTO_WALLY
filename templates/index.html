@@ -15,19 +15,16 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        /* Contenedor principal: mapa a la izquierda, info a la derecha */
         .dashboard {
             display: flex;
             height: 100vh;
         }
         
-        /* Mapa ocupa 70% del ancho */
         #map {
             flex: 7;
             height: 100%;
         }
         
-        /* Panel de información ocupa 30% */
         .info-panel {
             flex: 3;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -40,7 +37,7 @@
         
         .info-panel h1 {
             font-size: 24px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             border-bottom: 2px solid #00adb5;
             display: inline-block;
             padding-bottom: 5px;
@@ -48,7 +45,7 @@
         
         .subtitle {
             color: #aaa;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 12px;
         }
         
@@ -107,7 +104,48 @@
         .estado-conectado {
             background-color: #6bcb77;
         }
-        
+
+        .robot-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .edit-btn {
+            background: #00adb5;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .edit-btn:hover {
+            background: #008c93;
+        }
+
+        .color-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
         @media (max-width: 768px) {
             .dashboard {
                 flex-direction: column;
@@ -120,16 +158,21 @@
             }
         }
     </style>
-    <!-- Google Maps API - Reemplaza TU_API_KEY con tu clave real -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=TU_API_KEY_GOOGLE_MAPS"></script>
 </head>
 <body>
     <div class="dashboard">
         <div id="map"></div>
         
         <div class="info-panel">
-            <h1>🌍 WALLY</h1>
+            <h1>🤖 WALLY</h1>
             <div class="subtitle">Sistema de Monitoreo de Calidad del Aire</div>
+            
+            <div class="card">
+                <h3>📍 Información del Robot</h3>
+                <div class="robot-name" id="robot-name">WALLY-1</div>
+                <button class="edit-btn" onclick="abrirEditor()">✏️ Editar Robot</button>
+            </div>
             
             <div class="card">
                 <h3>📍 Última Ubicación</h3>
@@ -162,34 +205,167 @@
         </div>
     </div>
 
+    <!-- Modal para editar el robot -->
+    <div id="editorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background: #1a1a2e; padding: 30px; border-radius: 15px; width: 300px; text-align: center; color: white;">
+            <h2>🤖 Editar Robot</h2>
+            <div style="margin: 20px 0;">
+                <label>Nombre del Robot:</label>
+                <input type="text" id="edit-name" style="width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: none;">
+            </div>
+            <div style="margin: 20px 0;">
+                <label>Color del Robot:</label>
+                <div class="color-selector">
+                    <div class="color-option" style="background: #4CAF50;" onclick="cambiarColor('#4CAF50')"></div>
+                    <div class="color-option" style="background: #2196F3;" onclick="cambiarColor('#2196F3')"></div>
+                    <div class="color-option" style="background: #FF9800;" onclick="cambiarColor('#FF9800')"></div>
+                    <div class="color-option" style="background: #E91E63;" onclick="cambiarColor('#E91E63')"></div>
+                    <div class="color-option" style="background: #9C27B0;" onclick="cambiarColor('#9C27B0')"></div>
+                    <div class="color-option" style="background: #00BCD4;" onclick="cambiarColor('#00BCD4')"></div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="guardarEdicion()" style="flex: 1; padding: 10px; background: #4CAF50; border: none; color: white; border-radius: 5px; cursor: pointer;">Guardar</button>
+                <button onclick="cerrarEditor()" style="flex: 1; padding: 10px; background: #f44336; border: none; color: white; border-radius: 5px; cursor: pointer;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Variables globales
         let map;
         let marker;
         let updateInterval;
+        let currentInfoWindow = null;
         
-        // Inicializar el mapa cuando carga la página
+        // Datos del robot (se guardan en localStorage)
+        let robotConfig = {
+            nombre: localStorage.getItem('robotNombre') || 'WALLY-1',
+            color: localStorage.getItem('robotColor') || '#4CAF50'
+        };
+        
+        // Función para generar el ícono del robot con el color seleccionado
+        function generarIconoRobot(color) {
+            // Crear SVG dinámico con el color elegido
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+                <rect x='25' y='40' width='50' height='40' rx='10' fill='${color}'/>
+                <rect x='15' y='50' width='10' height='20' rx='3' fill='#333'/>
+                <rect x='75' y='50' width='10' height='20' rx='3' fill='#333'/>
+                <circle cx='40' cy='60' r='5' fill='white'/>
+                <circle cx='60' cy='60' r='5' fill='white'/>
+                <rect x='45' y='70' width='10' height='5' fill='white'/>
+                <rect x='35' y='20' width='30' height='20' rx='5' fill='${color}'/>
+                <circle cx='45' cy='30' r='3' fill='white'/>
+                <circle cx='55' cy='30' r='3' fill='white'/>
+            </svg>`;
+            
+            return {
+                url: "data:image/svg+xml," + encodeURIComponent(svg),
+                scaledSize: new google.maps.Size(60, 60)
+            };
+        }
+        
+        // Inicializar el mapa
         function initMap() {
-            // Centro inicial (Lima)
             const centroInicial = { lat: -12.0464, lng: -77.0428 };
             
-            // Crear el mapa
             map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 13,
                 center: centroInicial,
                 mapTypeId: google.maps.MapTypeId.ROADMAP
             });
             
-            // Crear un marcador vacío (se actualizará después)
+            // Crear marcador con ícono de robot personalizado
             marker = new google.maps.Marker({
                 position: centroInicial,
                 map: map,
-                title: "Esperando datos...",
+                title: robotConfig.nombre,
+                icon: generarIconoRobot(robotConfig.color),
                 animation: google.maps.Animation.DROP
             });
             
-            // Comenzar a actualizar datos
+            // Evento de clic en el marcador
+            marker.addListener('click', () => {
+                abrirInfoWindow();
+            });
+            
             startUpdating();
+        }
+        
+        // Abrir ventana de información al hacer clic en el robot
+        function abrirInfoWindow() {
+            // Cerrar ventana anterior si existe
+            if (currentInfoWindow) {
+                currentInfoWindow.close();
+            }
+            
+            // Crear contenido HTML para la ventana
+            const contentString = `
+                <div style="text-align: center; min-width: 200px; background: #1a1a2e; color: white; padding: 10px; border-radius: 10px;">
+                    <div style="font-size: 40px;">🤖</div>
+                    <h3 style="margin: 5px 0;">${robotConfig.nombre}</h3>
+                    <div style="margin: 10px 0;">
+                        <div>📊 CO: ${document.getElementById('co-value').innerText} ppm</div>
+                        <div>🌫️ PM: ${document.getElementById('pm-value').innerText} µg/m³</div>
+                    </div>
+                    <button onclick="abrirEditor()" style="background: #00adb5; border: none; color: white; padding: 5px 15px; border-radius: 5px; margin-top: 5px; cursor: pointer;">
+                        ✏️ Editar Robot
+                    </button>
+                </div>
+            `;
+            
+            currentInfoWindow = new google.maps.InfoWindow({
+                content: contentString,
+                pixelOffset: new google.maps.Size(0, -30)
+            });
+            
+            currentInfoWindow.open(map, marker);
+        }
+        
+        // Abrir el modal de edición
+        function abrirEditor() {
+            document.getElementById('edit-name').value = robotConfig.nombre;
+            document.getElementById('editorModal').style.display = 'flex';
+        }
+        
+        // Cerrar el modal
+        function cerrarEditor() {
+            document.getElementById('editorModal').style.display = 'none';
+        }
+        
+        // Cambiar color temporalmente (en el modal)
+        function cambiarColor(color) {
+            robotConfig.color = color;
+            // Previsualizar el cambio en el marcador
+            marker.setIcon(generarIconoRobot(color));
+        }
+        
+        // Guardar la edición
+        function guardarEdicion() {
+            const nuevoNombre = document.getElementById('edit-name').value;
+            if (nuevoNombre) {
+                robotConfig.nombre = nuevoNombre;
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('robotNombre', robotConfig.nombre);
+            localStorage.setItem('robotColor', robotConfig.color);
+            
+            // Actualizar el marcador
+            marker.setTitle(robotConfig.nombre);
+            marker.setIcon(generarIconoRobot(robotConfig.color));
+            
+            // Actualizar el panel lateral
+            document.getElementById('robot-name').innerHTML = robotConfig.nombre;
+            
+            // Cerrar modal
+            cerrarEditor();
+            
+            // Si la ventana de info está abierta, actualizarla
+            if (currentInfoWindow) {
+                currentInfoWindow.close();
+                abrirInfoWindow();
+            }
         }
         
         // Función para obtener la última medición del backend
@@ -229,7 +405,7 @@
             document.getElementById('pm-value').innerHTML = pmValue;
             document.getElementById('mq135-value').innerHTML = mq135Value;
             
-            // 3. Clasificar nivel de CO y cambiar color
+            // 3. Clasificar nivel de CO
             const coElement = document.getElementById('co-value');
             const coStatusElement = document.getElementById('co-status');
             
@@ -247,7 +423,7 @@
                 coStatusElement.style.color = '#6bcb77';
             }
             
-            // 4. Actualizar timestamp si existe
+            // 4. Actualizar timestamp
             if (data.timestamp) {
                 const fecha = new Date(data.timestamp);
                 document.getElementById('timestamp').innerHTML = 
@@ -255,15 +431,13 @@
                      Última actualización: ${fecha.toLocaleString()}`;
             }
             
-            // 5. Actualizar posición del marcador en el mapa
+            // 5. Actualizar posición del marcador
             const nuevaPosicion = { lat: data.lat, lng: data.lng };
             marker.setPosition(nuevaPosicion);
             map.setCenter(nuevaPosicion);
+            marker.setTitle(`${robotConfig.nombre} | CO: ${coValue} ppm | PM: ${pmValue} µg/m³`);
             
-            // Cambiar el título del marcador
-            marker.setTitle(`CO: ${coValue} ppm | PM: ${pmValue} µg/m³`);
-            
-            // Opcional: animación de rebote al actualizar
+            // Animación de rebote al actualizar
             marker.setAnimation(google.maps.Animation.BOUNCE);
             setTimeout(() => {
                 marker.setAnimation(null);
@@ -282,16 +456,17 @@
         
         // Iniciar la actualización periódica
         function startUpdating() {
-            // Actualizar inmediatamente
             obtenerUltimaMedicion();
-            // Luego actualizar cada 3 segundos
             updateInterval = setInterval(obtenerUltimaMedicion, 3000);
         }
         
-        // Asegurar que el mapa se cargue correctamente
+        // Actualizar nombre mostrado en el panel
+        function actualizarNombreEnPanel() {
+            document.getElementById('robot-name').innerHTML = robotConfig.nombre;
+        }
+        
         window.initMap = initMap;
+        actualizarNombreEnPanel();
     </script>
-    <!-- Cargar el mapa con callback -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap" async defer></script>
 </body>
 </html>
