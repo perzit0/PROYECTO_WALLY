@@ -1,17 +1,15 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from datetime import datetime
 import hashlib
-import secrets
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "WALLY_SECRET_KEY_2026_CAMBIA_ESTA_CLAVE"  # Cambia esto por una clave secreta
+app.secret_key = "WALLY_SECRET_KEY_2026_CAMBIA_ESTA_CLAVE"
 
 # ============================================
 # BASE DE DATOS SIMULADA (en memoria)
 # ============================================
 
-# Usuarios: {usuario: {password_hash, rol}}
 usuarios = {
     "admin": {
         "password": hashlib.sha256("admin123".encode()).hexdigest(),
@@ -42,7 +40,7 @@ ultima_medicion = {
 historial = []
 
 # ============================================
-# DECORADOR PARA RUTAS PROTEGIDAS (solo admin)
+# DECORADORES
 # ============================================
 
 def login_requerido(f):
@@ -69,7 +67,6 @@ def admin_requerido(f):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Si ya está logueado, redirigir al mapa
     if 'usuario' in session:
         return redirect(url_for('index'))
     
@@ -77,7 +74,6 @@ def login():
         usuario = request.form.get('usuario')
         password = request.form.get('password')
         
-        # Verificar credenciales
         if usuario in usuarios:
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             if usuarios[usuario]["password"] == password_hash:
@@ -89,6 +85,13 @@ def login():
     
     return render_template('login.html', error=None)
 
+@app.route('/acceso-invitado', methods=['POST'])
+def acceso_invitado():
+    """Crea una sesión de invitado sin necesidad de contraseña"""
+    session['usuario'] = 'invitado'
+    session['rol'] = 'user'
+    return jsonify({"status": "ok"})
+
 @app.route('/logout')
 def logout():
     session.clear()
@@ -99,9 +102,8 @@ def logout():
 # ============================================
 
 @app.route('/')
+@login_requerido
 def index():
-    if 'usuario' not in session:
-        return redirect(url_for('login'))
     return render_template('index.html', 
                           usuario=session['usuario'], 
                           rol=session['rol'],
@@ -110,13 +112,11 @@ def index():
 
 @app.route('/api/datos-robot', methods=['GET'])
 def obtener_datos_robot():
-    """Devuelve los datos actuales del robot (nombre y color)"""
     return jsonify(robot_data)
 
 @app.route('/api/datos-robot', methods=['POST'])
 @admin_requerido
 def actualizar_datos_robot():
-    """Actualiza los datos del robot (solo admin)"""
     global robot_data
     try:
         datos = request.get_json()

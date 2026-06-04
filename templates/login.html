@@ -60,7 +60,7 @@
         button {
             width: 100%;
             padding: 12px;
-            margin: 20px 0 10px;
+            margin: 10px 0;
             border: none;
             border-radius: 8px;
             background: #00adb5;
@@ -107,17 +107,6 @@
             color: #aaa;
             font-size: 12px;
         }
-        
-        .guest-link {
-            color: #00adb5;
-            text-decoration: none;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .guest-link:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
@@ -140,20 +129,20 @@
             <span>o</span>
         </div>
         
-        <form action="/acceso-directo" method="GET" style="margin-top: 10px;">
-            <button type="submit" class="btn-mapa" formaction="/" formmethod="GET" onclick="accesoInvitado()">🗺️ Abrir Mapa como Invitado</button>
-        </form>
+        <button class="btn-mapa" onclick="accesoInvitado()">🗺️ Abrir Mapa como Invitado</button>
     </div>
     
     <script>
         function accesoInvitado() {
-            // Hacer una petición para crear sesión de invitado
             fetch('/acceso-invitado', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 }
             }).then(() => {
+                window.location.href = '/';
+            }).catch(error => {
+                console.error('Error:', error);
                 window.location.href = '/';
             });
         }

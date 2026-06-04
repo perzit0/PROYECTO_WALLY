@@ -189,9 +189,7 @@
         }
     </style>
     
-    <!-- ========================================== -->
-    <!-- 🔑 LUGAR 1: PON AQUÍ TU CLAVE DE API (línea 1 de 2) -->
-    <!-- ========================================== -->
+    <!-- 🔑 LUGAR 1: PON AQUÍ TU CLAVE DE API (reemplaza TU_API_KEY_GOOGLE_MAPS) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU"></script>
     
 </head>
@@ -292,7 +290,6 @@
         
         const esAdmin = "{{ rol }}" === "admin";
         
-        // Función para generar el ícono del robot con el color seleccionado
         function generarIconoRobot(color) {
             const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
                 <rect x='25' y='40' width='50' height='40' rx='10' fill='${color}'/>
@@ -312,7 +309,6 @@
             };
         }
         
-        // Inicializar el mapa
         function initMap() {
             const centroInicial = { lat: -12.0464, lng: -77.0428 };
             
@@ -337,7 +333,6 @@
             startUpdating();
         }
         
-        // Abrir ventana de información al hacer clic en el robot
         function abrirInfoWindow() {
             if (currentInfoWindow) {
                 currentInfoWindow.close();
@@ -371,7 +366,6 @@
             currentInfoWindow.open(map, marker);
         }
         
-        // Abrir el modal de edición
         function abrirEditor() {
             if (!esAdmin) {
                 alert("Solo administradores pueden editar el robot.");
@@ -508,9 +502,7 @@
         window.initMap = initMap;
     </script>
     
-    <!-- ========================================== -->
-    <!-- 🔑 LUGAR 2: PON AQUÍ TU CLAVE DE API (línea 2 de 2) -->
-    <!-- ========================================== -->
+    <!-- 🔑 LUGAR 2: PON AQUÍ TU CLAVE DE API (reemplaza TU_API_KEY_GOOGLE_MAPS) -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap" async defer></script>
     
 </body>
