@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WALLY - Monitoreo de Calidad del Aire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        /* Contenedor principal: mapa a la izquierda, info a la derecha */
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Mapa ocupa 70% del ancho */
+        #map {
+            flex: 7;
+            height: 100%;
+        }
+        
+        /* Panel de información ocupa 30% */
+        .info-panel {
+            flex: 3;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+            z-index: 1;
+        }
+        
+        .info-panel h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #00adb5;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 12px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            color: #00adb5;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .sensor-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .sensor-unit {
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .co-alto { color: #ff6b6b; }
+        .co-medio { color: #ffd93d; }
+        .co-bajo { color: #6bcb77; }
+        
+        .coordenadas {
+            font-family: monospace;
+            font-size: 14px;
+            background: #00000055;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .timestamp {
+            font-size: 12px;
+            color: #888;
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .estado-conexion {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ff6b6b;
+            margin-right: 8px;
+        }
+        
+        .estado-conectado {
+            background-color: #6bcb77;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            #map {
+                height: 50vh;
+            }
+            .info-panel {
+                height: 50vh;
+            }
+        }
+    </style>
+    <!-- Google Maps API - Reemplaza TU_API_KEY con tu clave real -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <div id="map"></div>
+        
+        <div class="info-panel">
+            <h1>🌍 WALLY</h1>
+            <div class="subtitle">Sistema de Monitoreo de Calidad del Aire</div>
+            
+            <div class="card">
+                <h3>📍 Última Ubicación</h3>
+                <div class="coordenadas" id="coords">Esperando datos...</div>
+            </div>
+            
+            <div class="card">
+                <h3>💨 Monóxido de Carbono (CO)</h3>
+                <div class="sensor-value" id="co-value">---</div>
+                <div class="sensor-unit">ppm (partes por millón)</div>
+                <div id="co-status" style="margin-top: 10px;"></div>
+            </div>
+            
+            <div class="card">
+                <h3>🌫️ Material Particulado (PM2.5)</h3>
+                <div class="sensor-value" id="pm-value">---</div>
+                <div class="sensor-unit">µg/m³</div>
+            </div>
+            
+            <div class="card">
+                <h3>🏭 Calidad del Aire (MQ-135)</h3>
+                <div class="sensor-value" id="mq135-value">---</div>
+                <div class="sensor-unit">Valor ADC (0-4095)</div>
+            </div>
+            
+            <div class="timestamp" id="timestamp">
+                <span id="estado-conexion" class="estado-conexion"></span>
+                Esperando conexión...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let map;
+        let marker;
+        let updateInterval;
+        
+        // Inicializar el mapa cuando carga la página
+        function initMap() {
+            // Centro inicial (Lima)
+            const centroInicial = { lat: -12.0464, lng: -77.0428 };
+            
+            // Crear el mapa
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: centroInicial,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            });
+            
+            // Crear un marcador vacío (se actualizará después)
+            marker = new google.maps.Marker({
+                position: centroInicial,
+                map: map,
+                title: "Esperando datos...",
+                animation: google.maps.Animation.DROP
+            });
+            
+            // Comenzar a actualizar datos
+            startUpdating();
+        }
+        
+        // Función para obtener la última medición del backend
+        async function obtenerUltimaMedicion() {
+            try {
+                const response = await fetch('/api/ultima-medicion');
+                if (!response.ok) {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+                const data = await response.json();
+                
+                if (data && data.lat && data.lng) {
+                    actualizarInterfaz(data);
+                    actualizarConexionStatus(true);
+                } else {
+                    console.log("Esperando datos del ESP32...");
+                    actualizarConexionStatus(false);
+                }
+            } catch (error) {
+                console.error("Error al obtener datos:", error);
+                actualizarConexionStatus(false);
+            }
+        }
+        
+        // Actualizar toda la interfaz con los nuevos datos
+        function actualizarInterfaz(data) {
+            // 1. Actualizar coordenadas
+            document.getElementById('coords').innerHTML = 
+                `Latitud: ${data.lat.toFixed(6)}<br>Longitud: ${data.lng.toFixed(6)}`;
+            
+            // 2. Actualizar valores de sensores
+            const coValue = data.co;
+            const pmValue = data.pm;
+            const mq135Value = data.mq135;
+            
+            document.getElementById('co-value').innerHTML = coValue;
+            document.getElementById('pm-value').innerHTML = pmValue;
+            document.getElementById('mq135-value').innerHTML = mq135Value;
+            
+            // 3. Clasificar nivel de CO y cambiar color
+            const coElement = document.getElementById('co-value');
+            const coStatusElement = document.getElementById('co-status');
+            
+            if (coValue > 300) {
+                coElement.className = 'sensor-value co-alto';
+                coStatusElement.innerHTML = '⚠️ PELIGRO - Niveles altos de CO';
+                coStatusElement.style.color = '#ff6b6b';
+            } else if (coValue > 100) {
+                coElement.className = 'sensor-value co-medio';
+                coStatusElement.innerHTML = '⚡ Moderado - Precaución';
+                coStatusElement.style.color = '#ffd93d';
+            } else {
+                coElement.className = 'sensor-value co-bajo';
+                coStatusElement.innerHTML = '✅ Normal - Aire seguro';
+                coStatusElement.style.color = '#6bcb77';
+            }
+            
+            // 4. Actualizar timestamp si existe
+            if (data.timestamp) {
+                const fecha = new Date(data.timestamp);
+                document.getElementById('timestamp').innerHTML = 
+                    `<span id="estado-conexion" class="estado-conexion estado-conectado"></span>
+                     Última actualización: ${fecha.toLocaleString()}`;
+            }
+            
+            // 5. Actualizar posición del marcador en el mapa
+            const nuevaPosicion = { lat: data.lat, lng: data.lng };
+            marker.setPosition(nuevaPosicion);
+            map.setCenter(nuevaPosicion);
+            
+            // Cambiar el título del marcador
+            marker.setTitle(`CO: ${coValue} ppm | PM: ${pmValue} µg/m³`);
+            
+            // Opcional: animación de rebote al actualizar
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+            setTimeout(() => {
+                marker.setAnimation(null);
+            }, 750);
+        }
+        
+        // Actualizar el indicador de conexión
+        function actualizarConexionStatus(conectado) {
+            const estadoSpan = document.getElementById('estado-conexion');
+            if (conectado) {
+                estadoSpan.className = 'estado-conexion estado-conectado';
+            } else {
+                estadoSpan.className = 'estado-conexion';
+            }
+        }
+        
+        // Iniciar la actualización periódica
+        function startUpdating() {
+            // Actualizar inmediatamente
+            obtenerUltimaMedicion();
+            // Luego actualizar cada 3 segundos
+            updateInterval = setInterval(obtenerUltimaMedicion, 3000);
+        }
+        
+        // Asegurar que el mapa se cargue correctamente
+        window.initMap = initMap;
+    </script>
+    <!-- Cargar el mapa con callback -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap" async defer></script>
+</body>
+</html>
