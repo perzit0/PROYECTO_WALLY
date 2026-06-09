@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WALLY — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0b0f14;
+      --surface:  #131820;
+      --surface2: #1a2230;
+      --border:   #1f2d40;
+      --accent:   #00e5a0;
+      --warn:     #f59e0b;
+      --danger:   #ef4444;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --font:     'Space Grotesk', sans-serif;
+      --mono:     'JetBrains Mono', monospace;
+      --radius:   12px;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+    }
+
+    /* ── Login screen ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      width: 380px;
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .login-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #0b0f14;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .login-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--accent); }
+
+    /* ── Admin panel ── */
+    #admin-panel { display: none; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .badge-admin {
+      font-size: 11px;
+      font-weight: 500;
+      background: #00e5a020;
+      color: var(--accent);
+      border: 1px solid #00e5a040;
+      border-radius: 6px;
+      padding: 2px 8px;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn-sm {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+    .btn-danger {
+      border-color: #ef444440;
+      color: var(--danger);
+    }
+    .btn-danger:hover { border-color: var(--danger); }
+
+    main { padding: 24px 28px; max-width: 1100px; margin: 0 auto; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Tabla de robots ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--surface2);
+    }
+
+    th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      padding: 12px 16px;
+    }
+
+    td {
+      padding: 13px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    tr:hover td { background: var(--surface2); }
+
+    .td-mono {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .co-badge {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .co-ok   { background: #00e5a015; color: var(--accent); }
+    .co-warn { background: #f59e0b15; color: var(--warn); }
+    .co-bad  { background: #ef444415; color: var(--danger); }
+
+    .color-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .inline-edit {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inline-edit input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      padding: 5px 8px;
+      outline: none;
+      width: 120px;
+      transition: border-color 0.2s;
+    }
+    .inline-edit input:focus { border-color: var(--accent); }
+
+    .btn-save {
+      background: var(--accent);
+      color: #0b0f14;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* ── Logs ── */
+    .log-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .log-item:last-child { border-bottom: none; }
+
+    .log-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .log-accion { flex: 1; color: var(--text); }
+
+    .log-device {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    /* ── Stats rápidas top ── */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .qs-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+    }
+
+    .qs-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .qs-value {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 500;
+      line-height: 1;
+      color: var(--accent);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 8px;
+      display: none;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Login ── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="logo-dot"></div>
+      <span style="font-weight:600;font-size:17px">WALLY</span>
+    </div>
+    <div class="login-title">Panel de administración</div>
+    <div class="login-sub">Acceso restringido al equipo WALLY</div>
+
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="input-user" placeholder="teamwally" autocomplete="username"/>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="input-pass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+    <button class="btn-primary" id="btn-login">Entrar al panel</button>
+    <a href="/" class="back-link">← Volver al monitoreo</a>
+  </div>
+</div>
+
+<!-- ── Panel admin ── -->
+<div id="admin-panel">
+  <header>
+    <div class="header-logo">
+      <div class="logo-dot"></div>
+      WALLY
+      <span class="badge-admin">Admin</span>
+    </div>
+    <div class="header-right">
+      <span id="admin-user" style="font-size:13px;color:var(--muted)"></span>
+      <a href="/" class="btn-sm">← Monitoreo</a>
+      <button class="btn-sm btn-danger" id="btn-logout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Stats rápidas -->
+    <div class="quick-stats">
+      <div class="qs-box">
+        <div class="qs-label">Robots activos</div>
+        <div class="qs-value" id="qs-robots">—</div>
+      </div>
+      <div class="qs-box">
+        <div class="qs-label">CO promedio</div>
+        <div class="qs-value" id="qs-co">—</div>
+      </div>
+      <div class="qs-box">
+        <div class="qs-label">Alertas CO</div>
+        <div class="qs-value" id="qs-alertas" style="color:var(--warn)">—</div>
+      </div>
+      <div class="qs-box">
+        <div class="qs-label">Total mediciones</div>
+        <div class="qs-value" id="qs-total">—</div>
+      </div>
+    </div>
+
+    <!-- Tabla de robots -->
+    <div class="section-title">Dispositivos registrados</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Robot</th>
+            <th>ID</th>
+            <th>CO actual</th>
+            <th>Coordenadas</th>
+            <th>Última conexión</th>
+            <th>Nombre</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-robots">
+          <tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="section-title">Últimas mediciones</div>
+    <div class="log-list" id="log-list">
+      <div class="log-item" style="color:var(--muted)">Cargando...</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  function coClass(v) {
+    if (v < 50)  return 'co-ok';
+    if (v < 150) return 'co-warn';
+    return 'co-bad';
+  }
+
+  function tiempoRelativo(ts) {
+    if (!ts) return '—';
+    const diff = (Date.now() - new Date(ts)) / 1000;
+    if (diff < 60)   return Math.round(diff) + 's';
+    if (diff < 3600) return Math.round(diff/60) + 'min';
+    return Math.round(diff/3600) + 'h';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2500);
+  }
+
+  // ── Login ──
+  async function intentarLogin() {
+    const user = document.getElementById('input-user').value;
+    const pass = document.getElementById('input-pass').value;
+    const err  = document.getElementById('login-error');
+    err.style.display = 'none';
+
+    try {
+      const res  = await fetch('/admin/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: user, password: pass})
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('admin-user').textContent = user;
+        cargarDatos();
+      } else {
+        err.style.display = 'block';
+      }
+    } catch {
+      err.textContent = 'Error de conexión';
+      err.style.display = 'block';
+    }
+  }
+
+  document.getElementById('btn-login').addEventListener('click', intentarLogin);
+  document.getElementById('input-pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') intentarLogin();
+  });
+
+  // ── Logout ──
+  document.getElementById('btn-logout').addEventListener('click', async () => {
+    await fetch('/admin/logout', {method: 'POST'});
+    document.getElementById('admin-panel').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  });
+
+  // ── Verificar si ya está logueado ──
+  async function checkSession() {
+    const res  = await fetch('/admin/status');
+    const data = await res.json();
+    if (data.is_admin) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+      document.getElementById('admin-user').textContent = data.usuario;
+      cargarDatos();
+    }
+  }
+
+  // ── Renombrar robot ──
+  async function renombrar(device_id, inputEl) {
+    const nuevo = inputEl.value.trim();
+    if (!nuevo) return;
+    const res = await fetch(`/api/dispositivos/${device_id}/nombre`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nombre: nuevo})
+    });
+    if (res.ok) {
+      showToast('✓ Nombre actualizado');
+      cargarDatos();
+    }
+  }
+
+  // ── Cargar datos ──
+  async function cargarDatos() {
+    try {
+      const res  = await fetch('/api/dispositivos');
+      const data = await res.json();
+
+      // Stats
+      const coVals = data.map(d => d.co).filter(v => v > 0);
+      const coProm = coVals.length ? Math.round(coVals.reduce((a,b)=>a+b,0)/coVals.length) : 0;
+      document.getElementById('qs-robots').textContent   = data.length;
+      document.getElementById('qs-co').textContent       = coProm || '—';
+      document.getElementById('qs-alertas').textContent  = coVals.filter(v => v > 150).length;
+
+      // Tabla
+      const tbody = document.getElementById('tabla-robots');
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:var(--muted);text-align:center;padding:24px">Sin robots conectados aún</td></tr>';
+      } else {
+        tbody.innerHTML = data.map(d => `
+          <tr>
+            <td>
+              <span class="color-dot" style="background:${d.color}"></span>
+              ${d.nombre}
+            </td>
+            <td class="td-mono">${d.id}</td>
+            <td><span class="co-badge ${coClass(d.co)}">${d.co} ppm</span></td>
+            <td class="td-mono">${d.lat ? d.lat.toFixed(5)+', '+d.lng.toFixed(5) : 'Sin GPS'}</td>
+            <td class="td-mono">hace ${tiempoRelativo(d.timestamp)}</td>
+            <td>
+              <div class="inline-edit">
+                <input type="text" value="${d.nombre}" id="inp-${d.id}" placeholder="Nuevo nombre"/>
+                <button class="btn-save" onclick="renombrar('${d.id}', document.getElementById('inp-${d.id}'))">Guardar</button>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Historial (obtener de todos los robots)
+      let todasMediciones = [];
+      let totalMediciones = 0;
+      for (const d of data) {
+        const hr  = await fetch(`/api/historial/${d.id}`);
+        const med = await hr.json();
+        totalMediciones += med.length;
+        todasMediciones.push(...med.map(m => ({...m, robot: d.nombre, color: d.color})));
+      }
+
+      document.getElementById('qs-total').textContent = totalMediciones;
+
+      todasMediciones.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+      const recientes = todasMediciones.slice(0, 20);
+
+      const logList = document.getElementById('log-list');
+      if (recientes.length === 0) {
+        logList.innerHTML = '<div class="log-item" style="color:var(--muted)">Sin mediciones aún</div>';
+      } else {
+        logList.innerHTML = recientes.map(m => `
+          <div class="log-item">
+            <div class="log-time">${new Date(m.timestamp).toLocaleTimeString('es-PE')}</div>
+            <div class="log-accion">
+              CO: <span style="font-family:var(--mono)">${m.co} ppm</span>
+              &nbsp;·&nbsp;
+              GPS: <span style="font-family:var(--mono)">${m.lat ? m.lat.toFixed(4)+', '+m.lng.toFixed(4) : 'sin fix'}</span>
+            </div>
+            <div class="log-device">
+              <span style="width:7px;height:7px;border-radius:50%;background:${m.color};display:inline-block;margin-right:5px;vertical-align:middle"></span>
+              ${m.robot}
+            </div>
+          </div>
+        `).join('');
+      }
+
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  }
+
+  // ── Inicio ──
+  checkSession();
+  setInterval(() => {
+    const panel = document.getElementById('admin-panel');
+    if (panel.style.display !== 'none') cargarDatos();
+  }, 8000);
+</script>
+</body>
+</html>

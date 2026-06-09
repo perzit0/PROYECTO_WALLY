@@ -1,588 +1,783 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WALLY - Monitoreo de Calidad del Aire</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        #map-container {
-            position: relative;
-            height: 100vh;
-            width: 100%;
-        }
-        
-        #map {
-            height: 100%;
-            width: 100%;
-        }
-        
-        .admin-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: #1a1a2e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .admin-btn:hover {
-            background: #00adb5;
-            transform: scale(1.02);
-        }
-        
-        .admin-btn.logged {
-            background: #4CAF50;
-        }
-        
-        .info-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 15px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-        }
-        
-        .sensor-info {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .sensor-item {
-            text-align: center;
-        }
-        
-        .sensor-label {
-            font-size: 12px;
-            color: #aaa;
-        }
-        
-        .sensor-value {
-            font-size: 20px;
-            font-weight: bold;
-        }
-        
-        .co-alto { color: #ff6b6b; }
-        .co-medio { color: #ffd93d; }
-        .co-bajo { color: #6bcb77; }
-        
-        .robot-selector {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .robot-selector select {
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            background: rgba(255,255,255,0.2);
-            color: white;
-        }
-        
-        .timestamp {
-            font-size: 11px;
-            color: #888;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-content {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 20px;
-            width: 320px;
-            text-align: center;
-            color: white;
-            position: relative;
-        }
-        
-        .modal-content input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        
-        .modal-content button {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 8px;
-            background: #00adb5;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        
-        .modal-content button:hover {
-            background: #008c93;
-        }
-        
-        .modal-content .error {
-            color: #ff6b6b;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        
-        .close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        
-        .color-selector {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 15px 0;
-        }
-        
-        .color-option {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            transition: transform 0.2s;
-        }
-        
-        .color-option:hover {
-            transform: scale(1.1);
-        }
-        
-        .datos-prueba {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.7);
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: #ffd93d;
-            font-size: 12px;
-            font-family: monospace;
-        }
-        
-        @media (max-width: 768px) {
-            .info-panel {
-                flex-direction: column;
-                text-align: center;
-            }
-            .sensor-info {
-                justify-content: center;
-            }
-        }
-    </style>
-    <!-- API de Google Maps con tu clave -->
-    <script async defer 
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA7ChZcxm4erOCY2G36xOjY0aEvKXcg8IU&callback=initMap">
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WALLY — Monitoreo de Aire</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0b0f14;
+      --surface:   #131820;
+      --surface2:  #1a2230;
+      --border:    #1f2d40;
+      --accent:    #00e5a0;
+      --accent-dim:#00e5a020;
+      --warn:      #f59e0b;
+      --danger:    #ef4444;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --font:      'Space Grotesk', sans-serif;
+      --mono:      'JetBrains Mono', monospace;
+      --radius:    12px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .btn-admin {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .btn-admin:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Layout principal ── */
+    main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+      padding: 20px 28px;
+      min-height: calc(100vh - 57px);
+    }
+
+    /* ── Panel izquierdo ── */
+    .sidebar {
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── Stats rápidas ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-unit {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── Lista de robots ── */
+    .robot-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .robot-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .robot-item:hover,
+    .robot-item.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .robot-color {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .robot-info { flex: 1; min-width: 0; }
+
+    .robot-name {
+      font-weight: 500;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .robot-coords {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .robot-co {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .co-ok   { color: var(--accent); border-color: #00e5a040; }
+    .co-warn { color: var(--warn);   border-color: #f59e0b40; }
+    .co-bad  { color: var(--danger); border-color: #ef444440; }
+
+    /* ── Panel derecho: mapa ── */
+    .map-section {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .map-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .map-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .map-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      height: 420px;
+    }
+
+    #map { width: 100%; height: 100%; }
+
+    /* ── Panel detalle robot ── */
+    .detail-section {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .detail-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--muted);
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .detail-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .detail-card-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .detail-card-value {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .detail-card-unit {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .bar-track {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    .detail-meta {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Modal admin ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #00000090;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 360px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus { border-color: var(--accent); }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: var(--accent);
+      color: #0b0f14;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+
+    .btn-cancel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 14px;
+      border-radius: 8px;
+      padding: 11px 18px;
+      cursor: pointer;
+    }
+
+    .login-error {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* ── Leaflet overrides ── */
+    .leaflet-container { background: #0d1520; }
+    .leaflet-tile { filter: brightness(0.7) saturate(0.6); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+      .sidebar { grid-row: auto; }
+      .map-section, .detail-section { grid-column: 1; grid-row: auto; }
+    }
+  </style>
 </head>
 <body>
-    <div id="map-container">
-        <div id="map"></div>
-        
-        <div class="datos-prueba">
-            🧪 MODO PRUEBA - Datos simulados
-        </div>
-        
-        <button id="adminBtn" class="admin-btn" onclick="abrirModalLogin()">
-            🔐 Administrador
-        </button>
-        
-        <div class="info-panel">
-            <div class="robot-selector">
-                <span>🤖 Robot:</span>
-                <select id="robotSelect" onchange="cambiarRobotSeleccionado()">
-                    <option value="WALLY-1">WALLY-1 (Robot Principal)</option>
-                    <option value="WALLY-2">WALLY-2 (Robot Secundario)</option>
-                    <option value="WALLY-DEMO">WALLY-DEMO (Demostración)</option>
-                </select>
-            </div>
-            <div class="sensor-info">
-                <div class="sensor-item">
-                    <div class="sensor-label">💨 CO</div>
-                    <div class="sensor-value" id="coValue">---</div>
-                </div>
-                <div class="sensor-item">
-                    <div class="sensor-label">🌫️ PM2.5</div>
-                    <div class="sensor-value" id="pmValue">---</div>
-                </div>
-                <div class="sensor-item">
-                    <div class="sensor-label">🏭 MQ-135</div>
-                    <div class="sensor-value" id="mq135Value">---</div>
-                </div>
-            </div>
-            <div class="timestamp" id="timestamp">
-                Actualización en tiempo real...
-            </div>
-        </div>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    WALLY
+    <span style="color:var(--muted);font-weight:400;font-size:13px;margin-left:4px">monitoreo de aire</span>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="last-update">actualizando...</span>
     </div>
-    
-    <!-- Modal Login -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarModalLogin()">&times;</span>
-            <h2>🔐 Acceso Administrador</h2>
-            <input type="text" id="loginUser" placeholder="Usuario" autocomplete="off">
-            <input type="password" id="loginPass" placeholder="Contraseña">
-            <button onclick="iniciarSesion()">Iniciar Sesión</button>
-            <div id="loginError" class="error"></div>
+    <button class="btn-admin" id="btn-admin">Admin</button>
+  </div>
+</header>
+
+<!-- Main -->
+<main>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <!-- Stats generales -->
+    <div class="card">
+      <div class="card-title">Resumen general</div>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="stat-label">Robots activos</div>
+          <div class="stat-value" id="stat-robots">—</div>
+          <div class="stat-unit">en línea</div>
         </div>
-    </div>
-    
-    <!-- Modal Editar Robot -->
-    <div id="editorModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="cerrarEditor()">&times;</span>
-            <h2>🤖 Editar Robot</h2>
-            <div style="margin: 20px 0;">
-                <label>Nombre del Robot:</label>
-                <input type="text" id="editName" style="width: 100%;">
-            </div>
-            <div>
-                <label>Color del Robot:</label>
-                <div class="color-selector">
-                    <div class="color-option" style="background: #4CAF50;" onclick="seleccionarColor('#4CAF50')"></div>
-                    <div class="color-option" style="background: #2196F3;" onclick="seleccionarColor('#2196F3')"></div>
-                    <div class="color-option" style="background: #FF9800;" onclick="seleccionarColor('#FF9800')"></div>
-                    <div class="color-option" style="background: #E91E63;" onclick="seleccionarColor('#E91E63')"></div>
-                    <div class="color-option" style="background: #9C27B0;" onclick="seleccionarColor('#9C27B0')"></div>
-                    <div class="color-option" style="background: #00BCD4;" onclick="seleccionarColor('#00BCD4')"></div>
-                </div>
-            </div>
-            <button onclick="guardarEdicionRobot()">Guardar cambios</button>
+        <div class="stat-box">
+          <div class="stat-label">CO promedio</div>
+          <div class="stat-value" id="stat-co">—</div>
+          <div class="stat-unit">ppm</div>
         </div>
+        <div class="stat-box">
+          <div class="stat-label">Alertas CO</div>
+          <div class="stat-value" id="stat-alertas" style="color:var(--warn)">—</div>
+          <div class="stat-unit">> 150 ppm</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Última lectura</div>
+          <div class="stat-value" id="stat-tiempo" style="font-size:14px;padding-top:4px">—</div>
+          <div class="stat-unit">hace</div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        let map;
-        let markers = {};
-        let robotSeleccionado = "WALLY-1";
-        let esAdmin = false;
-        let updateInterval;
-        let colorTemporal = null;
-        
-        // Datos simulados para modo prueba (sin ESP32)
-        const datosSimulados = {
-            "WALLY-1": {
-                nombre: "WALLY-1",
-                color: "#4CAF50",
-                lat: -12.0464,
-                lng: -77.0428,
-                co: 85,
-                pm: 32,
-                mq135: 180,
-                timestamp: new Date().toISOString()
-            },
-            "WALLY-2": {
-                nombre: "WALLY-2",
-                color: "#2196F3",
-                lat: -12.1210,
-                lng: -77.0265,
-                co: 145,
-                pm: 68,
-                mq135: 320,
-                timestamp: new Date().toISOString()
-            },
-            "WALLY-DEMO": {
-                nombre: "WALLY-DEMO",
-                color: "#FF9800",
-                lat: -12.0960,
-                lng: -77.0345,
-                co: 220,
-                pm: 95,
-                mq135: 450,
-                timestamp: new Date().toISOString()
-            }
-        };
-        
-        function generarIconoRobot(color) {
-            const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-                <rect x='25' y='40' width='50' height='40' rx='10' fill='${color}'/>
-                <rect x='15' y='50' width='10' height='20' rx='3' fill='#333'/>
-                <rect x='75' y='50' width='10' height='20' rx='3' fill='#333'/>
-                <circle cx='40' cy='60' r='5' fill='white'/>
-                <circle cx='60' cy='60' r='5' fill='white'/>
-                <rect x='45' y='70' width='10' height='5' fill='white'/>
-                <rect x='35' y='20' width='30' height='20' rx='5' fill='${color}'/>
-                <circle cx='45' cy='30' r='3' fill='white'/>
-                <circle cx='55' cy='30' r='3' fill='white'/>
-            </svg>`;
-            return {
-                url: "data:image/svg+xml," + encodeURIComponent(svg),
-                scaledSize: new google.maps.Size(50, 50)
-            };
+    <!-- Lista de robots -->
+    <div class="card" style="flex:1">
+      <div class="card-title">Robots activos</div>
+      <div class="robot-list" id="robot-list">
+        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">
+          Cargando dispositivos...
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Mapa -->
+  <section class="map-section">
+    <div class="map-header">
+      <div>
+        <div class="map-title">Ubicación en tiempo real</div>
+        <div class="map-subtitle">Posición GPS de cada robot WALLY</div>
+      </div>
+    </div>
+    <div class="map-wrapper">
+      <div id="map"></div>
+    </div>
+  </section>
+
+  <!-- Detalle robot seleccionado -->
+  <section class="detail-section">
+    <div class="card" style="height:100%">
+      <div class="card-title">Detalle del robot</div>
+      <div id="detail-content">
+        <div class="detail-empty">
+          Selecciona un robot para ver sus lecturas
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Modal admin -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Acceso admin</div>
+    <div class="modal-sub">Panel de control WALLY</div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="input-user" placeholder="teamwally" />
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="input-pass" placeholder="••••••••" />
+    </div>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="btn-cancel">Cancelar</button>
+      <button class="btn-primary" id="btn-login">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Mapa ──
+  const map = L.map('map', { zoomControl: true }).setView([-12.06, -77.04], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  const markers = {};
+  let selectedId = null;
+
+  function coClass(v) {
+    if (v < 50)  return 'co-ok';
+    if (v < 150) return 'co-warn';
+    return 'co-bad';
+  }
+
+  function coColor(v) {
+    if (v < 50)  return '#00e5a0';
+    if (v < 150) return '#f59e0b';
+    return '#ef4444';
+  }
+
+  function tiempoRelativo(ts) {
+    if (!ts) return '—';
+    const diff = (Date.now() - new Date(ts)) / 1000;
+    if (diff < 60)  return Math.round(diff) + 's';
+    if (diff < 3600) return Math.round(diff/60) + 'min';
+    return Math.round(diff/3600) + 'h';
+  }
+
+  function renderDetail(d) {
+    const coColor_ = coColor(d.co);
+    const coPct    = Math.min((d.co / 400) * 100, 100).toFixed(0);
+    const lat = d.lat ? d.lat.toFixed(6) : '—';
+    const lng = d.lng ? d.lng.toFixed(6) : '—';
+
+    document.getElementById('detail-content').innerHTML = `
+      <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${d.color};display:inline-block;flex-shrink:0"></span>
+        <span style="font-weight:600;font-size:15px">${d.nombre}</span>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-left:auto">${d.id}</span>
+      </div>
+      <div class="detail-grid">
+        <div class="detail-card">
+          <div class="detail-card-label">Monóxido de carbono</div>
+          <div class="detail-card-value" style="color:${coColor_}">${d.co}</div>
+          <div class="detail-card-unit">ppm</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${coPct}%;background:${coColor_}"></div>
+          </div>
+          <div class="detail-meta">límite seguro: 50 ppm</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-label">Partículas PM (pronto)</div>
+          <div class="detail-card-value" style="color:var(--muted);font-size:20px;padding-top:6px">Sin sensor</div>
+          <div class="detail-card-unit">Sharp GP2Y pendiente</div>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-label">MQ-135 (pronto)</div>
+          <div class="detail-card-value" style="color:var(--muted);font-size:20px;padding-top:6px">Sin sensor</div>
+          <div class="detail-card-unit">Gases mixtos pendiente</div>
+        </div>
+        <div class="detail-card" style="grid-column:1/-1">
+          <div class="detail-card-label">Posición GPS</div>
+          <div style="display:flex;gap:24px;margin-top:4px">
+            <div>
+              <div style="font-size:11px;color:var(--muted)">Latitud</div>
+              <div style="font-family:var(--mono);font-size:15px">${lat}</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted)">Longitud</div>
+              <div style="font-family:var(--mono);font-size:15px">${lng}</div>
+            </div>
+            <div style="margin-left:auto;text-align:right">
+              <div style="font-size:11px;color:var(--muted)">Última lectura</div>
+              <div style="font-family:var(--mono);font-size:13px">hace ${tiempoRelativo(d.timestamp)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function crearIcono(color) {
+    return L.divIcon({
+      className: '',
+      html: `<div style="
+        width:14px;height:14px;
+        border-radius:50%;
+        background:${color};
+        border:2px solid #0b0f14;
+        box-shadow:0 0 10px ${color}80;
+      "></div>`,
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
+  }
+
+  async function cargarDatos() {
+    try {
+      const res  = await fetch('/api/dispositivos');
+      const data = await res.json();
+
+      // Estadísticas
+      const coVals   = data.map(d => d.co).filter(v => v > 0);
+      const coPromedio = coVals.length ? Math.round(coVals.reduce((a,b)=>a+b,0)/coVals.length) : 0;
+      const alertas  = coVals.filter(v => v > 150).length;
+
+      document.getElementById('stat-robots').textContent = data.length;
+      document.getElementById('stat-co').textContent     = coPromedio || '—';
+      document.getElementById('stat-alertas').textContent = alertas;
+
+      // Tiempo más reciente
+      const timestamps = data.map(d => d.timestamp).filter(Boolean);
+      if (timestamps.length) {
+        const mas_reciente = timestamps.sort().pop();
+        document.getElementById('stat-tiempo').textContent = tiempoRelativo(mas_reciente);
+      }
+
+      document.getElementById('last-update').textContent =
+        'act. ' + new Date().toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+
+      // Lista de robots
+      const lista = document.getElementById('robot-list');
+      lista.innerHTML = data.length === 0
+        ? '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Sin robots conectados</div>'
+        : data.map(d => `
+          <div class="robot-item ${selectedId===d.id?'active':''}" onclick="seleccionar('${d.id}')">
+            <div class="robot-color" style="background:${d.color}"></div>
+            <div class="robot-info">
+              <div class="robot-name">${d.nombre}</div>
+              <div class="robot-coords">${d.lat ? d.lat.toFixed(4)+', '+d.lng.toFixed(4) : 'Sin GPS aún'}</div>
+            </div>
+            <div class="robot-co ${coClass(d.co)}">${d.co} ppm</div>
+          </div>
+        `).join('');
+
+      // Marcadores en mapa
+      data.forEach(d => {
+        if (!d.lat || !d.lng) return;
+        if (markers[d.id]) {
+          markers[d.id].setLatLng([d.lat, d.lng]);
+        } else {
+          markers[d.id] = L.marker([d.lat, d.lng], { icon: crearIcono(d.color) })
+            .addTo(map)
+            .bindPopup(`<b>${d.nombre}</b><br>CO: ${d.co} ppm`);
         }
-        
-        function initMap() {
-            console.log("Inicializando mapa...");
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 12,
-                center: { lat: -12.0464, lng: -77.0428 },
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-            console.log("Mapa creado correctamente");
-            
-            // Crear marcadores para todos los robots simulados
-            for (const [id, datos] of Object.entries(datosSimulados)) {
-                markers[id] = new google.maps.Marker({
-                    position: { lat: datos.lat, lng: datos.lng },
-                    map: map,
-                    title: datos.nombre,
-                    icon: generarIconoRobot(datos.color)
-                });
-                
-                markers[id].addListener('click', () => {
-                    robotSeleccionado = id;
-                    actualizarPanelConRobot(datos);
-                    document.getElementById('robotSelect').value = id;
-                    if (esAdmin) abrirEditor();
-                });
-            }
-            
-            // Actualizar panel con el primer robot
-            actualizarPanelConRobot(datosSimulados["WALLY-1"]);
-            
-            // Iniciar simulación de datos en tiempo real
-            startSimulacion();
-            
-            verificarSesionAdmin();
-        }
-        
-        function actualizarPanelConRobot(robot) {
-            document.getElementById('coValue').innerHTML = Math.round(robot.co);
-            document.getElementById('pmValue').innerHTML = Math.round(robot.pm);
-            document.getElementById('mq135Value').innerHTML = Math.round(robot.mq135);
-            
-            const coElement = document.getElementById('coValue');
-            if (robot.co > 200) {
-                coElement.className = 'sensor-value co-alto';
-            } else if (robot.co > 100) {
-                coElement.className = 'sensor-value co-medio';
-            } else {
-                coElement.className = 'sensor-value co-bajo';
-            }
-            
-            const fecha = new Date(robot.timestamp);
-            document.getElementById('timestamp').innerHTML = `Última actualización: ${fecha.toLocaleTimeString()}`;
-            
-            // Centrar mapa en el robot seleccionado
-            map.setCenter({ lat: robot.lat, lng: robot.lng });
-        }
-        
-        function cambiarRobotSeleccionado() {
-            const select = document.getElementById('robotSelect');
-            robotSeleccionado = select.value;
-            if (datosSimulados[robotSeleccionado]) {
-                actualizarPanelConRobot(datosSimulados[robotSeleccionado]);
-            }
-        }
-        
-        // Simular datos cambiando aleatoriamente
-        function startSimulacion() {
-            setInterval(() => {
-                for (const [id, datos] of Object.entries(datosSimulados)) {
-                    // Variar valores aleatoriamente
-                    datos.co = Math.max(20, Math.min(500, datos.co + (Math.random() - 0.5) * 30));
-                    datos.pm = Math.max(10, Math.min(200, datos.pm + (Math.random() - 0.5) * 15));
-                    datos.mq135 = Math.max(50, Math.min(600, datos.mq135 + (Math.random() - 0.5) * 40));
-                    datos.timestamp = new Date().toISOString();
-                    
-                    // Pequeño movimiento en el mapa para WALLY-1
-                    if (id === "WALLY-1") {
-                        datos.lat += (Math.random() - 0.5) * 0.0005;
-                        datos.lng += (Math.random() - 0.5) * 0.0005;
-                    }
-                    
-                    // Actualizar marcador
-                    if (markers[id]) {
-                        markers[id].setPosition({ lat: datos.lat, lng: datos.lng });
-                    }
-                }
-                
-                // Actualizar panel si el robot seleccionado sigue siendo el mismo
-                if (datosSimulados[robotSeleccionado]) {
-                    actualizarPanelConRobot(datosSimulados[robotSeleccionado]);
-                }
-            }, 3000);
-        }
-        
-        async function verificarSesionAdmin() {
-            try {
-                const response = await fetch('/admin/status');
-                const data = await response.json();
-                esAdmin = data.is_admin;
-                const adminBtn = document.getElementById('adminBtn');
-                if (esAdmin) {
-                    adminBtn.innerHTML = '👑 Administrador';
-                    adminBtn.classList.add('logged');
-                } else {
-                    adminBtn.innerHTML = '🔐 Administrador';
-                    adminBtn.classList.remove('logged');
-                }
-            } catch (error) {
-                console.log("Modo prueba - Admin no disponible");
-            }
-        }
-        
-        function abrirModalLogin() {
-            if (esAdmin) {
-                cerrarSesion();
-            } else {
-                document.getElementById('loginModal').style.display = 'flex';
-                document.getElementById('loginError').innerHTML = '';
-            }
-        }
-        
-        function cerrarModalLogin() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-        
-        async function iniciarSesion() {
-            const username = document.getElementById('loginUser').value;
-            const password = document.getElementById('loginPass').value;
-            
-            try {
-                const response = await fetch('/admin/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    esAdmin = true;
-                    cerrarModalLogin();
-                    verificarSesionAdmin();
-                    abrirEditor();
-                } else {
-                    document.getElementById('loginError').innerHTML = data.error || 'Credenciales incorrectas';
-                }
-            } catch (error) {
-                // Modo prueba: permitir login con credenciales locales
-                if (username === "teamwally" && password === "mamani159") {
-                    esAdmin = true;
-                    cerrarModalLogin();
-                    verificarSesionAdmin();
-                    abrirEditor();
-                } else {
-                    document.getElementById('loginError').innerHTML = 'Usuario o contraseña incorrectos';
-                }
-            }
-        }
-        
-        async function cerrarSesion() {
-            try {
-                await fetch('/admin/logout', { method: 'POST' });
-            } catch (error) {}
-            esAdmin = false;
-            verificarSesionAdmin();
-            cerrarEditor();
-        }
-        
-        function abrirEditor() {
-            if (!esAdmin) {
-                alert("Debes ser administrador");
-                return;
-            }
-            const robot = datosSimulados[robotSeleccionado];
-            document.getElementById('editName').value = robot.nombre;
-            document.getElementById('editorModal').style.display = 'flex';
-            colorTemporal = robot.color;
-            // Previsualizar el color actual
-            if (markers[robotSeleccionado]) {
-                markers[robotSeleccionado].setIcon(generarIconoRobot(colorTemporal));
-            }
-        }
-        
-        function cerrarEditor() {
-            document.getElementById('editorModal').style.display = 'none';
-            // Restaurar color original si no se guardó
-            if (robotSeleccionado && datosSimulados[robotSeleccionado] && markers[robotSeleccionado]) {
-                markers[robotSeleccionado].setIcon(generarIconoRobot(datosSimulados[robotSeleccionado].color));
-            }
-        }
-        
-        function seleccionarColor(color) {
-            colorTemporal = color;
-            if (markers[robotSeleccionado]) {
-                markers[robotSeleccionado].setIcon(generarIconoRobot(color));
-            }
-        }
-        
-        function guardarEdicionRobot() {
-            const nuevoNombre = document.getElementById('editName').value;
-            const nuevoColor = colorTemporal || datosSimulados[robotSeleccionado].color;
-            
-            if (datosSimulados[robotSeleccionado]) {
-                datosSimulados[robotSeleccionado].nombre = nuevoNombre;
-                datosSimulados[robotSeleccionado].color = nuevoColor;
-                markers[robotSeleccionado].setTitle(nuevoNombre);
-                markers[robotSeleccionado].setIcon(generarIconoRobot(nuevoColor));
-                
-                // Actualizar el selector
-                const select = document.getElementById('robotSelect');
-                const option = select.querySelector(`option[value="${robotSeleccionado}"]`);
-                if (option) {
-                    option.textContent = `${nuevoNombre} (${robotSeleccionado === "WALLY-1" ? "Robot Principal" : robotSeleccionado === "WALLY-2" ? "Robot Secundario" : "Demostración"})`;
-                }
-            }
-            
-            cerrarEditor();
-            alert("Robot actualizado (modo prueba)");
-        }
-        
-        // Asegurar que initMap esté disponible globalmente
-        window.initMap = initMap;
-    </script>
+        markers[d.id].setIcon(crearIcono(d.color));
+        markers[d.id].getPopup()?.setContent(`<b>${d.nombre}</b><br>CO: ${d.co} ppm`);
+      });
+
+      // Actualizar detalle si hay uno seleccionado
+      if (selectedId) {
+        const actual = data.find(d => d.id === selectedId);
+        if (actual) renderDetail(actual);
+      }
+
+      window._ultimosDatos = data;
+
+    } catch (err) {
+      console.error('Error al cargar datos:', err);
+    }
+  }
+
+  function seleccionar(id) {
+    selectedId = id;
+    const d = (window._ultimosDatos || []).find(x => x.id === id);
+    if (d) {
+      renderDetail(d);
+      if (d.lat && d.lng) map.setView([d.lat, d.lng], 15, { animate: true });
+    }
+    // Resaltar item activo
+    document.querySelectorAll('.robot-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.robot-item').forEach(el => {
+      if (el.onclick.toString().includes(id)) el.classList.add('active');
+    });
+  }
+
+  // ── Admin modal ──
+  document.getElementById('btn-admin').addEventListener('click', () => {
+    document.getElementById('modal-overlay').classList.add('open');
+  });
+  document.getElementById('btn-cancel').addEventListener('click', () => {
+    document.getElementById('modal-overlay').classList.remove('open');
+  });
+  document.getElementById('btn-login').addEventListener('click', async () => {
+    const user = document.getElementById('input-user').value;
+    const pass = document.getElementById('input-pass').value;
+    const err  = document.getElementById('login-error');
+    err.style.display = 'none';
+    try {
+      const res  = await fetch('/admin/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: user, password: pass})
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('modal-overlay').classList.remove('open');
+        document.getElementById('btn-admin').textContent = '✓ Admin';
+        document.getElementById('btn-admin').style.color = '#00e5a0';
+      } else {
+        err.style.display = 'block';
+      }
+    } catch {
+      err.textContent = 'Error de conexión';
+      err.style.display = 'block';
+    }
+  });
+
+  // ── Inicio ──
+  cargarDatos();
+  setInterval(cargarDatos, 5000);
+</script>
 </body>
 </html>
