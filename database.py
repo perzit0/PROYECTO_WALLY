@@ -64,7 +64,7 @@ def crear_tablas():
 
     conn.commit()
     conn.close()
-    print("✅ Tablas creadas correctamente")
+    print("Tablas creadas correctamente")
 
 def registrar_o_actualizar_dispositivo(device_id, nombre=None, lat=None, lng=None):
     conn = get_connection()
@@ -78,7 +78,7 @@ def registrar_o_actualizar_dispositivo(device_id, nombre=None, lat=None, lng=Non
             WHERE id = ?
         ''', (device_id,))
     else:
-        nombre_usar = nombre if nombre else f"WALLY-{device_id[-1:]}"
+        nombre_usar = nombre if nombre else device_id
         cursor.execute('''
             INSERT INTO dispositivos (id, nombre, ultima_conexion, fecha_registro)
             VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -199,8 +199,8 @@ def inicializar_base_datos():
     admin = verificar_usuario('teamwally', 'mamani159')
     if not admin:
         crear_usuario('teamwally', 'mamani159', 'admin')
-        print("✅ Usuario admin creado")
+        print("Usuario admin creado")
 
 if __name__ == '__main__':
     inicializar_base_datos()
-    print("🎉 Base de datos lista!")
+    print("Base de datos lista!")

@@ -7,7 +7,9 @@ from database import (
     guardar_medicion,
     registrar_o_actualizar_dispositivo,
     obtener_todos_los_dispositivos,
-    obtener_ultima_medicion
+    obtener_ultima_medicion,
+    obtener_historial,
+    actualizar_nombre_robot
 )
 
 app = Flask(__name__)
@@ -61,6 +63,9 @@ def admin_status():
     return jsonify({"is_admin": False})
 
 # ── API: recibir datos del ESP32 ──
+# co    = MQ-7  (monóxido de carbono)
+# pm    = Sharp (polvo, ug/m3)
+# mq135 = MQ-135 (otros gases)
 @app.route('/api/datos', methods=['POST'])
 def recibir_datos():
     data = request.get_json()
@@ -69,6 +74,8 @@ def recibir_datos():
 
     device_id = data.get('device_id', 'WALLY-1')
     co        = data.get('co', 0)
+    pm        = data.get('pm', 0)
+    mq135     = data.get('mq135', 0)
     lat       = data.get('lat', 0)
     lng       = data.get('lng', 0)
 
@@ -76,8 +83,8 @@ def recibir_datos():
     guardar_medicion(
         device_id,
         co    = co,
-        pm    = 0,
-        mq135 = 0,
+        pm    = pm,
+        mq135 = mq135,
         lat   = lat,
         lng   = lng
     )
@@ -109,7 +116,6 @@ def obtener_dispositivos():
 # ── API: historial de un dispositivo ──
 @app.route('/api/historial/<device_id>')
 def historial(device_id):
-    from database import obtener_historial
     datos = obtener_historial(device_id, limite=50)
     return jsonify(datos)
 
@@ -117,7 +123,6 @@ def historial(device_id):
 @app.route('/api/dispositivos/<device_id>/nombre', methods=['PUT'])
 @admin_requerido
 def cambiar_nombre(device_id):
-    from database import actualizar_nombre_robot
     data = request.get_json()
     nuevo = data.get('nombre', '').strip()
     if not nuevo:

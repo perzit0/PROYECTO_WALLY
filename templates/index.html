@@ -10,7 +10,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg:        #0b0f14;
       --surface:   #131820;
@@ -26,7 +25,6 @@
       --mono:      'JetBrains Mono', monospace;
       --radius:    12px;
     }
-
     html, body {
       height: 100%;
       background: var(--bg);
@@ -35,8 +33,6 @@
       font-size: 15px;
       line-height: 1.6;
     }
-
-    /* ── Header ── */
     header {
       display: flex;
       align-items: center;
@@ -48,7 +44,6 @@
       top: 0;
       z-index: 100;
     }
-
     .logo {
       display: flex;
       align-items: center;
@@ -57,7 +52,6 @@
       font-size: 17px;
       letter-spacing: -0.3px;
     }
-
     .logo-dot {
       width: 10px;
       height: 10px;
@@ -66,18 +60,11 @@
       box-shadow: 0 0 8px var(--accent);
       animation: pulse 2s ease-in-out infinite;
     }
-
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50%       { opacity: 0.5; transform: scale(0.8); }
     }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
+    .header-right { display: flex; align-items: center; gap: 14px; }
     .status-badge {
       display: flex;
       align-items: center;
@@ -86,14 +73,7 @@
       color: var(--muted);
       font-family: var(--mono);
     }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
     .btn-admin {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -107,8 +87,6 @@
       transition: border-color 0.2s;
     }
     .btn-admin:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── Layout principal ── */
     main {
       display: grid;
       grid-template-columns: 340px 1fr;
@@ -117,22 +95,13 @@
       padding: 20px 28px;
       min-height: calc(100vh - 57px);
     }
-
-    /* ── Panel izquierdo ── */
-    .sidebar {
-      grid-row: 1 / 3;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
+    .sidebar { grid-row: 1 / 3; display: flex; flex-direction: column; gap: 16px; }
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 18px;
     }
-
     .card-title {
       font-size: 11px;
       font-weight: 600;
@@ -141,27 +110,14 @@
       color: var(--muted);
       margin-bottom: 14px;
     }
-
-    /* ── Stats rápidas ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .stat-box {
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 10px;
       padding: 14px;
     }
-
-    .stat-label {
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
+    .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
     .stat-value {
       font-family: var(--mono);
       font-size: 22px;
@@ -169,20 +125,8 @@
       color: var(--accent);
       line-height: 1;
     }
-
-    .stat-unit {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* ── Lista de robots ── */
-    .robot-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
+    .stat-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .robot-list { display: flex; flex-direction: column; gap: 8px; }
     .robot-item {
       display: flex;
       align-items: center;
@@ -194,22 +138,12 @@
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
     }
-
-    .robot-item:hover,
-    .robot-item.active {
+    .robot-item:hover, .robot-item.active {
       border-color: var(--accent);
       background: var(--accent-dim);
     }
-
-    .robot-color {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
+    .robot-color { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .robot-info { flex: 1; min-width: 0; }
-
     .robot-name {
       font-weight: 500;
       font-size: 13px;
@@ -217,14 +151,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    .robot-coords {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
+    .robot-coords { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 1px; }
     .robot-co {
       font-family: var(--mono);
       font-size: 12px;
@@ -234,36 +161,13 @@
       background: var(--surface);
       border: 1px solid var(--border);
     }
-
     .co-ok   { color: var(--accent); border-color: #00e5a040; }
     .co-warn { color: var(--warn);   border-color: #f59e0b40; }
     .co-bad  { color: var(--danger); border-color: #ef444440; }
-
-    /* ── Panel derecho: mapa ── */
-    .map-section {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .map-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .map-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .map-subtitle {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
+    .map-section { grid-column: 2; grid-row: 1; }
+    .map-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .map-title { font-size: 13px; font-weight: 600; color: var(--text); }
+    .map-subtitle { font-size: 11px; color: var(--muted); margin-top: 1px; }
     .map-wrapper {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -271,15 +175,8 @@
       overflow: hidden;
       height: 420px;
     }
-
     #map { width: 100%; height: 100%; }
-
-    /* ── Panel detalle robot ── */
-    .detail-section {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
+    .detail-section { grid-column: 2; grid-row: 2; }
     .detail-empty {
       display: flex;
       align-items: center;
@@ -289,20 +186,13 @@
       font-size: 13px;
       gap: 8px;
     }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .detail-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 16px;
     }
-
     .detail-card-label {
       font-size: 11px;
       color: var(--muted);
@@ -310,20 +200,8 @@
       letter-spacing: 0.06em;
       margin-bottom: 8px;
     }
-
-    .detail-card-value {
-      font-family: var(--mono);
-      font-size: 28px;
-      font-weight: 500;
-      line-height: 1;
-    }
-
-    .detail-card-unit {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
+    .detail-card-value { font-family: var(--mono); font-size: 28px; font-weight: 500; line-height: 1; }
+    .detail-card-unit { font-size: 12px; color: var(--muted); margin-top: 4px; }
     .bar-track {
       height: 4px;
       background: var(--surface2);
@@ -331,21 +209,8 @@
       margin-top: 10px;
       overflow: hidden;
     }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 2px;
-      transition: width 0.6s ease;
-    }
-
-    .detail-meta {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    /* ── Modal admin ── */
+    .bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .detail-meta { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; }
     .modal-overlay {
       display: none;
       position: fixed;
@@ -356,36 +221,11 @@
       justify-content: center;
     }
     .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      width: 360px;
-    }
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .modal-sub {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 20px;
-    }
-
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 360px; }
+    .modal-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
     .field { margin-bottom: 14px; }
-
-    .field label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
+    .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
     .field input {
       width: 100%;
       background: var(--surface2);
@@ -399,13 +239,7 @@
       transition: border-color 0.2s;
     }
     .field input:focus { border-color: var(--accent); }
-
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
     .btn-primary {
       flex: 1;
       background: var(--accent);
@@ -420,7 +254,6 @@
       transition: opacity 0.2s;
     }
     .btn-primary:hover { opacity: 0.85; }
-
     .btn-cancel {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -431,24 +264,11 @@
       padding: 11px 18px;
       cursor: pointer;
     }
-
-    .login-error {
-      font-size: 12px;
-      color: var(--danger);
-      margin-top: 8px;
-      display: none;
-    }
-
-    /* ── Leaflet overrides ── */
+    .login-error { font-size: 12px; color: var(--danger); margin-top: 8px; display: none; }
     .leaflet-container { background: #0d1520; }
     .leaflet-tile { filter: brightness(0.7) saturate(0.6); }
-
-    /* ── Responsive ── */
     @media (max-width: 900px) {
-      main {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto;
-      }
+      main { grid-template-columns: 1fr; grid-template-rows: auto; }
       .sidebar { grid-row: auto; }
       .map-section, .detail-section { grid-column: 1; grid-row: auto; }
     }
@@ -456,7 +276,6 @@
 </head>
 <body>
 
-<!-- Header -->
 <header>
   <div class="logo">
     <div class="logo-dot"></div>
@@ -472,13 +291,8 @@
   </div>
 </header>
 
-<!-- Main -->
 <main>
-
-  <!-- Sidebar -->
   <aside class="sidebar">
-
-    <!-- Stats generales -->
     <div class="card">
       <div class="card-title">Resumen general</div>
       <div class="stats-grid">
@@ -504,20 +318,14 @@
         </div>
       </div>
     </div>
-
-    <!-- Lista de robots -->
     <div class="card" style="flex:1">
       <div class="card-title">Robots activos</div>
       <div class="robot-list" id="robot-list">
-        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">
-          Cargando dispositivos...
-        </div>
+        <div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Cargando dispositivos...</div>
       </div>
     </div>
-
   </aside>
 
-  <!-- Mapa -->
   <section class="map-section">
     <div class="map-header">
       <div>
@@ -525,26 +333,19 @@
         <div class="map-subtitle">Posición GPS de cada robot WALLY</div>
       </div>
     </div>
-    <div class="map-wrapper">
-      <div id="map"></div>
-    </div>
+    <div class="map-wrapper"><div id="map"></div></div>
   </section>
 
-  <!-- Detalle robot seleccionado -->
   <section class="detail-section">
     <div class="card" style="height:100%">
       <div class="card-title">Detalle del robot</div>
       <div id="detail-content">
-        <div class="detail-empty">
-          Selecciona un robot para ver sus lecturas
-        </div>
+        <div class="detail-empty">Selecciona un robot para ver sus lecturas</div>
       </div>
     </div>
   </section>
-
 </main>
 
-<!-- Modal admin -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">Acceso admin</div>
@@ -566,27 +367,14 @@
 </div>
 
 <script>
-  // ── Mapa ──
   const map = L.map('map', { zoomControl: true }).setView([-12.06, -77.04], 12);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
 
   const markers = {};
   let selectedId = null;
 
-  function coClass(v) {
-    if (v < 50)  return 'co-ok';
-    if (v < 150) return 'co-warn';
-    return 'co-bad';
-  }
-
-  function coColor(v) {
-    if (v < 50)  return '#00e5a0';
-    if (v < 150) return '#f59e0b';
-    return '#ef4444';
-  }
-
+  function coClass(v) { if (v < 50) return 'co-ok'; if (v < 150) return 'co-warn'; return 'co-bad'; }
+  function coColor(v) { if (v < 50) return '#00e5a0'; if (v < 150) return '#f59e0b'; return '#ef4444'; }
   function tiempoRelativo(ts) {
     if (!ts) return '—';
     const diff = (Date.now() - new Date(ts)) / 1000;
@@ -598,6 +386,10 @@
   function renderDetail(d) {
     const coColor_ = coColor(d.co);
     const coPct    = Math.min((d.co / 400) * 100, 100).toFixed(0);
+    const pmColor_ = coColor(d.pm);
+    const pmPct    = Math.min((d.pm / 400) * 100, 100).toFixed(0);
+    const gasColor_ = coColor(d.mq135);
+    const gasPct     = Math.min((d.mq135 / 400) * 100, 100).toFixed(0);
     const lat = d.lat ? d.lat.toFixed(6) : '—';
     const lng = d.lng ? d.lng.toFixed(6) : '—';
 
@@ -609,23 +401,25 @@
       </div>
       <div class="detail-grid">
         <div class="detail-card">
-          <div class="detail-card-label">Monóxido de carbono</div>
+          <div class="detail-card-label">CO</div>
           <div class="detail-card-value" style="color:${coColor_}">${d.co}</div>
           <div class="detail-card-unit">ppm</div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width:${coPct}%;background:${coColor_}"></div>
-          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${coPct}%;background:${coColor_}"></div></div>
           <div class="detail-meta">límite seguro: 50 ppm</div>
         </div>
         <div class="detail-card">
-          <div class="detail-card-label">Partículas PM (pronto)</div>
-          <div class="detail-card-value" style="color:var(--muted);font-size:20px;padding-top:6px">Sin sensor</div>
-          <div class="detail-card-unit">Sharp GP2Y pendiente</div>
+          <div class="detail-card-label">Polvo</div>
+          <div class="detail-card-value" style="color:${pmColor_}">${d.pm}</div>
+          <div class="detail-card-unit">µg/m³</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${pmPct}%;background:${pmColor_}"></div></div>
+          <div class="detail-meta">sensor Sharp GP2Y1010</div>
         </div>
         <div class="detail-card">
-          <div class="detail-card-label">MQ-135 (pronto)</div>
-          <div class="detail-card-value" style="color:var(--muted);font-size:20px;padding-top:6px">Sin sensor</div>
-          <div class="detail-card-unit">Gases mixtos pendiente</div>
+          <div class="detail-card-label">Otros gases</div>
+          <div class="detail-card-value" style="color:${gasColor_}">${d.mq135}</div>
+          <div class="detail-card-unit">lectura ADC</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${gasPct}%;background:${gasColor_}"></div></div>
+          <div class="detail-meta">sensor MQ-135</div>
         </div>
         <div class="detail-card" style="grid-column:1/-1">
           <div class="detail-card-label">Posición GPS</div>
@@ -651,13 +445,7 @@
   function crearIcono(color) {
     return L.divIcon({
       className: '',
-      html: `<div style="
-        width:14px;height:14px;
-        border-radius:50%;
-        background:${color};
-        border:2px solid #0b0f14;
-        box-shadow:0 0 10px ${color}80;
-      "></div>`,
+      html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid #0b0f14;box-shadow:0 0 10px ${color}80;"></div>`,
       iconSize: [14, 14],
       iconAnchor: [7, 7]
     });
@@ -668,7 +456,6 @@
       const res  = await fetch('/api/dispositivos');
       const data = await res.json();
 
-      // Estadísticas
       const coVals   = data.map(d => d.co).filter(v => v > 0);
       const coPromedio = coVals.length ? Math.round(coVals.reduce((a,b)=>a+b,0)/coVals.length) : 0;
       const alertas  = coVals.filter(v => v > 150).length;
@@ -677,7 +464,6 @@
       document.getElementById('stat-co').textContent     = coPromedio || '—';
       document.getElementById('stat-alertas').textContent = alertas;
 
-      // Tiempo más reciente
       const timestamps = data.map(d => d.timestamp).filter(Boolean);
       if (timestamps.length) {
         const mas_reciente = timestamps.sort().pop();
@@ -687,7 +473,6 @@
       document.getElementById('last-update').textContent =
         'act. ' + new Date().toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
-      // Lista de robots
       const lista = document.getElementById('robot-list');
       lista.innerHTML = data.length === 0
         ? '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px 0">Sin robots conectados</div>'
@@ -702,7 +487,6 @@
           </div>
         `).join('');
 
-      // Marcadores en mapa
       data.forEach(d => {
         if (!d.lat || !d.lng) return;
         if (markers[d.id]) {
@@ -710,20 +494,18 @@
         } else {
           markers[d.id] = L.marker([d.lat, d.lng], { icon: crearIcono(d.color) })
             .addTo(map)
-            .bindPopup(`<b>${d.nombre}</b><br>CO: ${d.co} ppm`);
+            .bindPopup(`<b>${d.nombre}</b><br>CO: ${d.co} ppm<br>Polvo: ${d.pm} µg/m³<br>Otros gases: ${d.mq135}`);
         }
         markers[d.id].setIcon(crearIcono(d.color));
-        markers[d.id].getPopup()?.setContent(`<b>${d.nombre}</b><br>CO: ${d.co} ppm`);
+        markers[d.id].getPopup()?.setContent(`<b>${d.nombre}</b><br>CO: ${d.co} ppm<br>Polvo: ${d.pm} µg/m³<br>Otros gases: ${d.mq135}`);
       });
 
-      // Actualizar detalle si hay uno seleccionado
       if (selectedId) {
         const actual = data.find(d => d.id === selectedId);
         if (actual) renderDetail(actual);
       }
 
       window._ultimosDatos = data;
-
     } catch (err) {
       console.error('Error al cargar datos:', err);
     }
@@ -736,14 +518,12 @@
       renderDetail(d);
       if (d.lat && d.lng) map.setView([d.lat, d.lng], 15, { animate: true });
     }
-    // Resaltar item activo
     document.querySelectorAll('.robot-item').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.robot-item').forEach(el => {
       if (el.onclick.toString().includes(id)) el.classList.add('active');
     });
   }
 
-  // ── Admin modal ──
   document.getElementById('btn-admin').addEventListener('click', () => {
     document.getElementById('modal-overlay').classList.add('open');
   });
@@ -775,7 +555,6 @@
     }
   });
 
-  // ── Inicio ──
   cargarDatos();
   setInterval(cargarDatos, 5000);
 </script>
