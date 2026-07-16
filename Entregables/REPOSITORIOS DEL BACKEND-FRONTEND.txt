@@ -1,0 +1,8 @@
+REPOSITORIO GITHUB BACKEND:
+
+https://github.com/perzit0/PROYECTO_WALLY_BACKEND
+
+
+REPOSITORIO GITHUB FRONTEND:
+
+https://github.com/perzit0/FRONTEND_WALLY
